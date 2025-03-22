@@ -49,7 +49,6 @@ import { ObjectId } from 'mongoose';
 import { CountModel } from '../models/Count';
 import axios from 'axios';
 import { BanksModel } from '../models/Banks';
-import { fetchHistoricalData } from './CryptoPriceController';
 
 @Tags('User')
 @Route('user')
@@ -450,6 +449,8 @@ export class UserController {
 
     if (!user.points || user?.points < 5000)
       throw new NotFoundError('You need a minimum of 5000 points');
+    if (user.pendingRewards)
+      throw new NotFoundError('You have a pending reward');
     const key = await this.getUniqueRewardId();
 
     await RewardModel.create({
@@ -617,20 +618,5 @@ export class UserController {
     await user.save();
 
     return successResponse('Default bank updated successfully', user.banks);
-  }
-
-  @Get('/crypto/historical')
-  public async getCryptoHistoricalData(
-    @Query() symbol: string,
-    @Query() timeframe: string,
-    @Query() limit: string,
-  ) {
-    const data = await fetchHistoricalData(
-      symbol,
-      timeframe,
-      limit ? parseInt(limit as string) : 100,
-    );
-
-    return successResponse('Historical data retrieved successfully', data);
   }
 }

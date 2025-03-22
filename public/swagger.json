@@ -541,44 +541,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"CandleData": {
-				"properties": {
-					"timestamp": {
-						"type": "number",
-						"format": "double"
-					},
-					"open": {
-						"type": "number",
-						"format": "double"
-					},
-					"high": {
-						"type": "number",
-						"format": "double"
-					},
-					"low": {
-						"type": "number",
-						"format": "double"
-					},
-					"close": {
-						"type": "number",
-						"format": "double"
-					},
-					"volume": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"timestamp",
-					"open",
-					"high",
-					"low",
-					"close",
-					"volume"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"mongoose.FlattenMaps__name-string--url-string--icon-string__": {
 				"properties": {},
 				"type": "object"
@@ -1963,76 +1925,6 @@
 					{
 						"in": "path",
 						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/user/crypto/historical": {
-			"get": {
-				"operationId": "GetCryptoHistoricalData",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"data": {
-											"items": {
-												"$ref": "#/components/schemas/CandleData"
-											},
-											"type": "array"
-										},
-										"message": {
-											"type": "string"
-										},
-										"success": {
-											"type": "boolean"
-										}
-									},
-									"required": [
-										"data",
-										"message",
-										"success"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"User"
-				],
-				"security": [
-					{
-						"BearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "symbol",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "timeframe",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "limit",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -4911,6 +4803,10 @@
 		{
 			"url": "http://localhost:3000",
 			"description": "localhost dev"
+		},
+		{
+			"url": "http://44.211.39.97",
+			"description": "testing"
 		}
 	]
 }

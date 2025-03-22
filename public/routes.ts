@@ -265,19 +265,6 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "CandleData": {
-        "dataType": "refObject",
-        "properties": {
-            "timestamp": {"dataType":"double","required":true},
-            "open": {"dataType":"double","required":true},
-            "high": {"dataType":"double","required":true},
-            "low": {"dataType":"double","required":true},
-            "close": {"dataType":"double","required":true},
-            "volume": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "mongoose.FlattenMaps__name-string--url-string--icon-string__": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
@@ -1067,39 +1054,6 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
 
               await templateService.apiHandler({
                 methodName: 'setDefaultBank',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsUserController_getCryptoHistoricalData: Record<string, TsoaRoute.ParameterSchema> = {
-                symbol: {"in":"query","name":"symbol","required":true,"dataType":"string"},
-                timeframe: {"in":"query","name":"timeframe","required":true,"dataType":"string"},
-                limit: {"in":"query","name":"limit","required":true,"dataType":"string"},
-        };
-        app.get('/user/crypto/historical',
-            authenticateMiddleware([{"BearerAuth":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(UserController)),
-            ...(fetchMiddlewares<RequestHandler>(UserController.prototype.getCryptoHistoricalData)),
-
-            async function UserController_getCryptoHistoricalData(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsUserController_getCryptoHistoricalData, request, response });
-
-                const controller = new UserController();
-
-              await templateService.apiHandler({
-                methodName: 'getCryptoHistoricalData',
                 controller,
                 response,
                 next,
