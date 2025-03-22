@@ -1,4 +1,4 @@
-// src/services/binanceService.ts
+// src/services/coinbaseService.ts
 import WebSocket from 'ws';
 import { Server } from 'http';
 import axios from 'axios';
@@ -15,36 +15,46 @@ interface CandleData {
   volume: number;
 }
 
-interface BinanceKlineMessage {
-  e: string; // Event type
-  E: number; // Event time
-  s: string; // Symbol
-  k: {
-    t: number; // Kline start time
-    T: number; // Kline close time
-    s: string; // Symbol
-    i: string; // Interval
-    f: number; // First trade ID
-    L: number; // Last trade ID
-    o: string; // Open price
-    c: string; // Close price
-    h: string; // High price
-    l: string; // Low price
-    v: string; // Base asset volume
-    n: number; // Number of trades
-    x: boolean; // Is this kline closed?
-    q: string; // Quote asset volume
-    V: string; // Taker buy base asset volume
-    Q: string; // Taker buy quote asset volume
-    B: string; // Ignore
-  };
+// Coinbase message types
+interface CoinbaseSubscription {
+  type: string;
+  product_ids: string[];
+  channels: string[];
 }
+
+interface CoinbaseCandle {
+  time: number;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
+  volume: string;
+}
+
+// Map timeframes to Coinbase granularity (in seconds)
+const timeframeMap: Record<string, number> = {
+  '1m': 60,
+  '5m': 300,
+  '15m': 900,
+  '1h': 3600,
+  '4h': 14400,
+  '1d': 86400,
+};
 
 // Map to store active connections
 const activeConnections: Map<
   string,
-  { binanceWs: WebSocket; clients: Set<WebSocket> }
+  { coinbaseWs: WebSocket; clients: Set<WebSocket> }
 > = new Map();
+
+// Map Binance symbol format to Coinbase product_id format
+function mapSymbolToCoinbaseProduct(symbol: string): string {
+  // Binance uses formats like BTCUSDT, Coinbase uses BTC-USDT
+  // Extract the trading pair (assuming standard format)
+  const base = symbol.slice(0, -4); // Assuming USDT pairs
+  const quote = symbol.slice(-4);
+  return `${base}-${quote}`;
+}
 
 // Function to fetch historical data
 export async function fetchHistoricalData(
@@ -53,21 +63,26 @@ export async function fetchHistoricalData(
   limit = 100,
 ): Promise<CandleData[]> {
   try {
-    const endpoint = `https://api.binance.com/api/v3/klines?symbol=${symbol.toUpperCase()}&interval=${timeframe}&limit=${limit}`;
+    const product = mapSymbolToCoinbaseProduct(symbol);
+    const granularity = timeframeMap[timeframe];
+
+    // Coinbase API endpoint for historical candles
+    const endpoint = `https://api.exchange.coinbase.com/products/${product}/candles?granularity=${granularity}`;
     const response = await axios.get(endpoint);
     const data = response.data;
 
-    // Format data for the chart [time, open, high, low, close, ...]
-    return data.map((candle: any[]) => ({
-      timestamp: candle[0],
-      open: parseFloat(candle[1]),
+    // Coinbase returns data in reverse chronological order and different format
+    // [time, low, high, open, close, volume]
+    return data.reverse().map((candle: any[]) => ({
+      timestamp: candle[0] * 1000, // Convert to milliseconds to match Binance
+      open: parseFloat(candle[3]),
       high: parseFloat(candle[2]),
-      low: parseFloat(candle[3]),
+      low: parseFloat(candle[1]),
       close: parseFloat(candle[4]),
       volume: parseFloat(candle[5]),
     }));
   } catch (error) {
-    console.error('Error fetching historical data:', error);
+    console.error('Error fetching historical data from Coinbase:', error);
     throw error;
   }
 }
@@ -96,11 +111,11 @@ export function initWebSocketServer(server: Server): void {
             if (connection) {
               connection.clients.delete(ws);
 
-              // If no more clients, close the Binance connection
+              // If no more clients, close the Coinbase connection
               if (connection.clients.size === 0) {
-                connection.binanceWs.close();
+                connection.coinbaseWs.close();
                 activeConnections.delete(key);
-                console.log(`Closed Binance connection for ${key}`);
+                console.log(`Closed Coinbase connection for ${key}`);
               }
             }
           }
@@ -108,6 +123,7 @@ export function initWebSocketServer(server: Server): void {
           // Set new subscription
           clientSubscription = { symbol, timeframe };
           const key = `${symbol}_${timeframe}`;
+          const product = mapSymbolToCoinbaseProduct(symbol);
 
           // Send historical data first
           try {
@@ -122,7 +138,7 @@ export function initWebSocketServer(server: Server): void {
             ws.send(
               JSON.stringify({
                 type: 'error',
-                message: 'Failed to fetch historical data',
+                message: 'Failed to fetch historical data from Coinbase',
               }),
             );
             return;
@@ -130,41 +146,115 @@ export function initWebSocketServer(server: Server): void {
 
           // Check if we already have a connection for this symbol/timeframe
           if (!activeConnections.has(key)) {
-            // Connect to Binance WebSocket
-            const binanceWsEndpoint = `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${timeframe}`;
-            const binanceWs = new WebSocket(binanceWsEndpoint);
+            // Connect to Coinbase WebSocket
+            const coinbaseWsEndpoint = 'wss://ws-feed.exchange.coinbase.com';
+            const coinbaseWs = new WebSocket(coinbaseWsEndpoint);
 
             const newConnection = {
-              binanceWs,
+              coinbaseWs,
               clients: new Set<WebSocket>([ws]),
             };
 
             activeConnections.set(key, newConnection);
 
-            binanceWs.on('open', () => {
-              console.log(`Connected to Binance WebSocket for ${key}`);
+            coinbaseWs.on('open', () => {
+              console.log(`Connected to Coinbase WebSocket for ${key}`);
+
+              // Subscribe to the channel
+              const subscribeMsg: CoinbaseSubscription = {
+                type: 'subscribe',
+                product_ids: [product],
+                channels: ['ticker'],
+              };
+              coinbaseWs.send(JSON.stringify(subscribeMsg));
             });
 
-            binanceWs.on('message', (binanceData) => {
-              const parsedData: BinanceKlineMessage = JSON.parse(
-                binanceData.toString(),
-              );
+            // Set up a polling mechanism for timeframes > 1m since Coinbase doesn't have kline streams
+            if (timeframe !== '1m') {
+              const granularity = timeframeMap[timeframe];
+              const intervalTime = granularity * 1000; // Convert to milliseconds
 
-              // Forward the message to all connected clients
-              for (const client of newConnection.clients) {
-                if (client.readyState === WebSocket.OPEN) {
-                  client.send(
-                    JSON.stringify({
-                      type: 'update',
-                      data: parsedData,
-                    }),
+              const intervalId = setInterval(async () => {
+                try {
+                  const newData = await fetchHistoricalData(
+                    symbol,
+                    timeframe,
+                    1,
                   );
+                  if (newData && newData.length > 0) {
+                    for (const client of newConnection.clients) {
+                      if (client.readyState === WebSocket.OPEN) {
+                        client.send(
+                          JSON.stringify({
+                            type: 'update',
+                            data: {
+                              k: {
+                                t: newData[0].timestamp,
+                                o: newData[0].open.toString(),
+                                h: newData[0].high.toString(),
+                                l: newData[0].low.toString(),
+                                c: newData[0].close.toString(),
+                                v: newData[0].volume.toString(),
+                                x: true, // Candle closed
+                              },
+                            },
+                          }),
+                        );
+                      }
+                    }
+                  }
+                } catch (error) {
+                  console.error(
+                    `Error fetching interval data for ${key}:`,
+                    error,
+                  );
+                }
+              }, intervalTime);
+
+              // Store the interval ID for cleanup
+              (newConnection as any).intervalId = intervalId;
+            }
+
+            coinbaseWs.on('message', (coinbaseData) => {
+              const parsedData = JSON.parse(coinbaseData.toString());
+
+              // Only process ticker messages
+              if (parsedData.type === 'ticker') {
+                // Transform to a format similar to what your frontend expects
+                const transformedData = {
+                  e: 'kline', // Event type
+                  E: Date.now(), // Event time
+                  s: symbol, // Symbol
+                  k: {
+                    t: new Date(parsedData.time).getTime(), // Kline start time
+                    T: new Date(parsedData.time).getTime(), // Kline close time
+                    s: symbol, // Symbol
+                    i: timeframe, // Interval
+                    o: parsedData.open_24h, // Use as open price
+                    c: parsedData.price, // Current price as close
+                    h: parsedData.high_24h, // 24h high
+                    l: parsedData.low_24h, // 24h low
+                    v: parsedData.volume_24h, // 24h volume
+                    x: false, // Not closed
+                  },
+                };
+
+                // Forward the message to all connected clients
+                for (const client of newConnection.clients) {
+                  if (client.readyState === WebSocket.OPEN) {
+                    client.send(
+                      JSON.stringify({
+                        type: 'update',
+                        data: transformedData,
+                      }),
+                    );
+                  }
                 }
               }
             });
 
-            binanceWs.on('error', (error) => {
-              console.error(`Binance WebSocket error for ${key}:`, error);
+            coinbaseWs.on('error', (error) => {
+              console.error(`Coinbase WebSocket error for ${key}:`, error);
 
               // Notify all clients about the error
               for (const client of newConnection.clients) {
@@ -172,15 +262,21 @@ export function initWebSocketServer(server: Server): void {
                   client.send(
                     JSON.stringify({
                       type: 'error',
-                      message: 'Binance WebSocket error',
+                      message: 'Coinbase WebSocket error',
                     }),
                   );
                 }
               }
             });
 
-            binanceWs.on('close', () => {
-              console.log(`Binance WebSocket closed for ${key}`);
+            coinbaseWs.on('close', () => {
+              console.log(`Coinbase WebSocket closed for ${key}`);
+
+              // Clear any polling intervals if they exist
+              if ((newConnection as any).intervalId) {
+                clearInterval((newConnection as any).intervalId);
+              }
+
               activeConnections.delete(key);
 
               // Notify all clients about the closure
@@ -189,7 +285,7 @@ export function initWebSocketServer(server: Server): void {
                   client.send(
                     JSON.stringify({
                       type: 'closed',
-                      message: 'Binance WebSocket connection closed',
+                      message: 'Coinbase WebSocket connection closed',
                     }),
                   );
                 }
@@ -222,11 +318,17 @@ export function initWebSocketServer(server: Server): void {
         if (connection) {
           connection.clients.delete(ws);
 
-          // If no more clients, close the Binance connection
+          // If no more clients, close the Coinbase connection
           if (connection.clients.size === 0) {
-            connection.binanceWs.close();
+            connection.coinbaseWs.close();
+
+            // Clear any intervals
+            if ((connection as any).intervalId) {
+              clearInterval((connection as any).intervalId);
+            }
+
             activeConnections.delete(key);
-            console.log(`Closed Binance connection for ${key}`);
+            console.log(`Closed Coinbase connection for ${key}`);
           }
         }
       }
