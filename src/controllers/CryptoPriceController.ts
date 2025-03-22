@@ -43,7 +43,11 @@ export function initWebSocketServer(server: Server): void {
   coinbaseWs.on('message', async (data) => {
     const message = JSON.parse(data.toString());
 
-    if (message.type === 'ticker') {
+    if (message.type === 'subscriptions')
+      console.log('Subscription confirmed:', JSON.stringify(message));
+    else if (message.type === 'error')
+      console.error('Coinbase subscription error:', message);
+    else if (message.type === 'ticker') {
       const symbol = message.product_id;
       const price = parseFloat(message.price);
       const open24h = parseFloat(message.open_24h);
@@ -51,9 +55,11 @@ export function initWebSocketServer(server: Server): void {
 
       const change24h = price - open24h;
       const changePercent24h = ((change24h / open24h) * 100).toFixed(2);
+      console.log(
+        `Received ticker for ${message.product_id}: ${message.price}`,
+      );
 
       const chartData = await fetchHistoricalDataFromCoinbase(symbol);
-
       const update: MarketUpdate = {
         symbol,
         price,
@@ -106,32 +112,39 @@ export function initWebSocketServer(server: Server): void {
 async function fetchHistoricalDataFromCoinbase(
   symbol: string,
 ): Promise<CandleData[]> {
-  try {
-    const granularity = 3600;
-    const end = Math.floor(Date.now() / 1000);
-    const start = end - 24 * 60 * 60;
+  const granularity = 3600; // 1 hour candles
+  const end = Math.floor(Date.now() / 1000);
+  const start = end - 24 * 60 * 60; // Last 24 hours
 
-    const response = await axios.get(
-      `https://api.exchange.coinbase.com/products/${symbol}/candles`,
-      {
-        params: {
-          granularity,
-          start,
-          end,
-        },
+  console.log(
+    `Fetching historical data for ${symbol}, start: ${new Date(
+      start * 1000,
+    ).toISOString()}, end: ${new Date(end * 1000).toISOString()}`,
+  );
+
+  const response = await axios.get(
+    `https://api.exchange.coinbase.com/products/${symbol}/candles`,
+    {
+      params: {
+        granularity,
+        start: new Date(start * 1000).toISOString(),
+        end: new Date(end * 1000).toISOString(),
       },
-    );
+      headers: {
+        Accept: 'application/json',
+      },
+    },
+  );
 
-    return response.data.map((candle: number[]) => ({
-      timestamp: candle[0] * 1000,
-      open: candle[3],
-      high: candle[2],
-      low: candle[1],
-      close: candle[4],
-      volume: candle[5],
-    }));
-  } catch (error) {
-    console.error('Error fetching historical data from Coinbase:', error);
-    return [];
-  }
+  console.log(`Received ${response.data.length} candles for ${symbol}`);
+
+  // Transform the data as before
+  return response.data.map((candle: number[]) => ({
+    timestamp: candle[0] * 1000,
+    low: candle[1],
+    high: candle[2],
+    open: candle[3],
+    close: candle[4],
+    volume: candle[5],
+  }));
 }
