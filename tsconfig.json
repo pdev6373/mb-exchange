@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "lib": ["ES2021", "DOM"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "commonjs",
+    "baseUrl": "src",
+    "sourceMap": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "strictPropertyInitialization": true,
+    "skipLibCheck": false
+  },
+  "include": ["./src/**/*", "./src/types.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}

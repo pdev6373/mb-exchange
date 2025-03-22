@@ -1,0 +1,35 @@
+{
+  "entryFile": "src/index.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/controllers/**/*.ts"],
+  "basePath": "/api/v1",
+  "spec": {
+    "outputDirectory": "./public",
+    "specVersion": 3,
+    "securityDefinitions": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "specMerging": "recursive",
+    "spec": {
+      "info": {
+        "title": "MD Exchange API",
+        "description": "API for managing MD Exchange operations",
+        "version": "1.0.0"
+      },
+      "servers": [
+        {
+          "url": "http://localhost:3000",
+          "description": "localhost dev"
+        }
+      ]
+    }
+  },
+  "routes": {
+    "routesDir": "./public",
+    "authenticationModule": "./src/middleware/authentication.ts"
+  }
+}
