@@ -24,6 +24,10 @@
         {
           "url": "http://localhost:3000",
           "description": "localhost dev"
+        },
+        {
+          "url": "http://44.211.39.97",
+          "description": "testing"
         }
       ]
     }
