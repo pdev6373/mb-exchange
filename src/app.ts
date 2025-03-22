@@ -13,9 +13,9 @@ import { Types } from 'mongoose';
 import { Admin } from './models/Admin';
 import { RoleType } from './types';
 import multer from 'multer';
-import { expressAuthentication } from './middleware/authentication';
 import { createServer } from 'http';
 import { initWebSocketServer } from './controllers/CryptoPriceController';
+import { expressAuthentication } from './middleware/authentication';
 
 const storage = multer.memoryStorage();
 const upload = multer({
