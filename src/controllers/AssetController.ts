@@ -73,6 +73,7 @@ export class AssetController {
       platforms,
       description,
       isActive: isActive ?? true,
+      cryptoId,
     });
 
     return successResponse('Asset created successfully', asset.toJSON());
