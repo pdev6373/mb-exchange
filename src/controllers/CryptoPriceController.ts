@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import { Server } from 'http';
 import axios from 'axios';
+import { AssetModel } from '../models/Asset';
 
 interface MarketUpdate {
   symbol: string;
@@ -32,9 +33,10 @@ const historyCache = new Map<
 // Cache expiration time for historical data (24 hours)
 const HISTORICAL_CACHE_EXPIRATION = 30 * 60 * 1000;
 
-export function initWebSocketServer(server: Server): void {
+export async function initWebSocketServer(server: Server) {
   const wss = new WebSocket.Server({ server });
-  const symbols = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD', 'USDT-USD'];
+  const assets = await AssetModel.find();
+  const symbols = assets?.map((asset) => `${asset.symbol.toUpperCase()}-USD`);
   const clients = new Set<WebSocket>();
 
   // Store latest updates for each symbol
