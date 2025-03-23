@@ -349,7 +349,7 @@ export class UserController {
 
     const platforms = assetExist.platformAddresses;
     const platformExist = platforms.find(
-      (platform: any) => platform._id === platform,
+      (platform: any) => platform._id === platformId,
     );
 
     if (!platformExist) throw new NotFoundError('Platform not found');

@@ -8,7 +8,7 @@ export const AddAssetSchema = z.object({
   rate: z.number().positive('Rate must be a positive number'),
   vipRate: z.number().positive('VIP rate must be a positive number').optional(),
   description: z.string().optional(),
-  platforms: z.record(z.string(), z.string()).optional(),
+  hasPlatforms: z.boolean(),
   isActive: z.boolean().optional(),
   platformAddresses: z.array(
     z.object({
@@ -26,7 +26,7 @@ export interface IAddAssetInput {
   rate: number;
   vipRate?: number;
   description?: string;
-  platforms?: Record<string, string>;
+  hasPlatforms: boolean;
   isActive?: boolean;
   platformAddresses: {
     platform: string;
@@ -37,7 +37,7 @@ export interface IAddAssetInput {
 export const UpdateAssetSchema = z.object({
   rate: z.number().positive('Rate must be a positive number').optional(),
   vipRate: z.number().positive('VIP rate must be a positive number').optional(),
-  platforms: z.record(z.string(), z.string()).optional(),
+  hasPlatforms: z.boolean().optional(),
   isActive: z.boolean().optional(),
   platformAddresses: z
     .array(
@@ -52,7 +52,7 @@ export const UpdateAssetSchema = z.object({
 export interface IUpdateAssetInput {
   rate?: number;
   vipRate?: number;
-  platforms?: Record<string, string>;
+  hasPlatforms?: boolean;
   isActive?: boolean;
   platformAddresses?: {
     platform: string;

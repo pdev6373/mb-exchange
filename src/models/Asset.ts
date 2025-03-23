@@ -30,8 +30,8 @@ export class Asset {
   @prop()
   public description?: string;
 
-  @prop({ type: () => Object })
-  public platforms?: Record<string, string>;
+  @prop({ required: true })
+  public hasPlatforms!: boolean;
 
   @prop({ default: true })
   public isActive?: boolean;
