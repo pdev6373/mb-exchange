@@ -57,6 +57,7 @@ export function initWebSocketServer(server: Server): void {
     const message = JSON.parse(data.toString());
 
     if (message.type === 'ticker') {
+      console.log('aa', message);
       const symbol = message.product_id;
       const price = parseFloat(message.price);
       const open24h = parseFloat(message.open_24h);
