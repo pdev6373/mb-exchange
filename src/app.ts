@@ -46,7 +46,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: '*',
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    credentials: true,
+    optionsSuccessStatus: 200,
   }),
 );
 app.use(morgan('common'));
