@@ -9,7 +9,7 @@ mongoose
   .connect(DATABASE_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    server.listen(PORT, '0.0.0.0', () => {
+    server.listen(PORT, () => {
       // Bind to all interfaces
       console.log(`Server running on http://192.168.80.27:${PORT}`);
       console.log(`Server also accessible on http://localhost:${PORT}`);
