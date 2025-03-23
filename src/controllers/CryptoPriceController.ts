@@ -57,7 +57,6 @@ export function initWebSocketServer(server: Server): void {
     const message = JSON.parse(data.toString());
 
     if (message.type === 'ticker') {
-      console.log('aa', message);
       const symbol = message.product_id;
       const price = parseFloat(message.price);
       const open24h = parseFloat(message.open_24h);
@@ -65,6 +64,7 @@ export function initWebSocketServer(server: Server): void {
 
       const change24h = price - open24h;
       const changePercent24h = ((change24h / open24h) * 100).toFixed(2);
+      console.log('aa', changePercent24h);
 
       // Get historical data with caching
       let chartData: CandleData[] = [];
