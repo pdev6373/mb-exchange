@@ -192,7 +192,7 @@ export function initWebSocketServer(server: Server): void {
 async function fetchHistoricalDataFromCoinbase(
   symbol: string,
 ): Promise<CandleData[]> {
-  const granularity = 300;
+  const granularity = 1800;
   const end = Math.floor(Date.now() / 1000);
   const start = end - 24 * 60 * 60;
 
