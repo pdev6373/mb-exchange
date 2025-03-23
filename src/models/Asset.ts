@@ -1,6 +1,6 @@
 import { prop, getModelForClass } from '@typegoose/typegoose';
 
-class NetworkAddress {
+class PlatformAddress {
   @prop({ required: true })
   public platform!: string;
 
@@ -36,8 +36,8 @@ export class Asset {
   @prop({ default: true })
   public isActive?: boolean;
 
-  @prop({ type: () => [NetworkAddress], _id: false, default: [] })
-  public networkAddresses!: NetworkAddress[];
+  @prop({ type: () => [PlatformAddress], _id: false, default: [] })
+  public platformAddresses!: PlatformAddress[];
 }
 
 export const AssetModel = getModelForClass(Asset, {

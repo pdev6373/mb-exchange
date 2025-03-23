@@ -10,10 +10,10 @@ export const AddAssetSchema = z.object({
   description: z.string().optional(),
   platforms: z.record(z.string(), z.string()).optional(),
   isActive: z.boolean().optional(),
-  networkAddresses: z.array(
+  platformAddresses: z.array(
     z.object({
       platform: z.string().min(1, 'Platform name is required'),
-      address: z.string().min(1, 'Network address is required'),
+      address: z.string().min(1, 'Platform address is required'),
     }),
   ),
 });
@@ -28,7 +28,7 @@ export interface IAddAssetInput {
   description?: string;
   platforms?: Record<string, string>;
   isActive?: boolean;
-  networkAddresses: {
+  platformAddresses: {
     platform: string;
     address: string;
   }[];
@@ -39,11 +39,11 @@ export const UpdateAssetSchema = z.object({
   vipRate: z.number().positive('VIP rate must be a positive number').optional(),
   platforms: z.record(z.string(), z.string()).optional(),
   isActive: z.boolean().optional(),
-  networkAddresses: z
+  platformAddresses: z
     .array(
       z.object({
         platform: z.string().min(1, 'Platform name is required'),
-        address: z.string().min(1, 'Network address is required'),
+        address: z.string().min(1, 'Platform address is required'),
       }),
     )
     .optional(),
@@ -54,7 +54,7 @@ export interface IUpdateAssetInput {
   vipRate?: number;
   platforms?: Record<string, string>;
   isActive?: boolean;
-  networkAddresses?: {
+  platformAddresses?: {
     platform: string;
     address: string;
   }[];

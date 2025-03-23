@@ -46,7 +46,6 @@ export class AssetController {
   public async createAsset(@Body() data: IAddAssetInput) {
     const {
       name,
-      networkAddresses,
       rate,
       symbol,
       vipRate,
@@ -55,6 +54,7 @@ export class AssetController {
       description,
       isActive,
       cryptoId,
+      platformAddresses,
     } = data;
 
     const existingAsset = await AssetModel.findOne({
@@ -69,7 +69,7 @@ export class AssetController {
       image,
       rate,
       vipRate: vipRate || rate,
-      networkAddresses,
+      platformAddresses,
       platforms,
       description,
       isActive: isActive ?? true,
@@ -85,7 +85,7 @@ export class AssetController {
     @Path() id: string,
     @Body() data: IUpdateAssetInput,
   ) {
-    const { networkAddresses, rate, vipRate, platforms, isActive } = data;
+    const { platformAddresses, rate, vipRate, platforms, isActive } = data;
 
     const asset = await AssetModel.findById(id);
     if (!asset) throw new NotFoundError('Asset not found');
@@ -94,7 +94,7 @@ export class AssetController {
     if (vipRate !== undefined) asset.vipRate = vipRate;
     if (platforms !== undefined) asset.platforms = platforms;
     if (isActive !== undefined) asset.isActive = isActive;
-    if (networkAddresses?.length) asset.networkAddresses = networkAddresses;
+    if (platformAddresses?.length) asset.platformAddresses = platformAddresses;
 
     await asset.save();
     return successResponse('Asset updated successfully', asset.toJSON());
