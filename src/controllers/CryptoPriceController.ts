@@ -30,7 +30,7 @@ const historyCache = new Map<
 >();
 
 // Cache expiration time for historical data (24 hours)
-const HISTORICAL_CACHE_EXPIRATION = 24 * 60 * 60 * 1000;
+const HISTORICAL_CACHE_EXPIRATION = 30 * 60 * 1000;
 
 export function initWebSocketServer(server: Server): void {
   const wss = new WebSocket.Server({ server });
@@ -179,7 +179,7 @@ export function initWebSocketServer(server: Server): void {
         }
       }
     });
-  }, 60 * 60 * 1000); // Refresh every hour (adjust as needed)
+  }, 45 * 60 * 1000); // Refresh every hour (adjust as needed)
 
   process.on('SIGINT', () => {
     coinbaseWs.close();
