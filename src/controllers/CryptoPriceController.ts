@@ -188,9 +188,9 @@ export function initWebSocketServer(server: Server): void {
 async function fetchHistoricalDataFromCoinbase(
   symbol: string,
 ): Promise<CandleData[]> {
-  const granularity = 86400; // 24-hour candlesticks
-  const end = Math.floor(Date.now() / 1000); // Current time in seconds
-  const start = end - 300 * granularity; // 300 days ago
+  const granularity = 3600;
+  const end = Math.floor(Date.now() / 1000);
+  const start = end - 24 * 60 * 60;
 
   const response = await axios.get(
     `https://api.exchange.coinbase.com/products/${symbol}/candles`,
@@ -203,9 +203,8 @@ async function fetchHistoricalDataFromCoinbase(
     },
   );
 
-  // Map the response data to the CandleData format
   return response.data.map((candle: number[]) => ({
-    timestamp: candle[0] * 1000, // Convert to milliseconds
+    timestamp: candle[0] * 1000,
     low: candle[1],
     high: candle[2],
     open: candle[3],
