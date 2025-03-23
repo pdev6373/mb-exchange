@@ -63,8 +63,9 @@ export function initWebSocketServer(server: Server): void {
       const volume24h = parseFloat(message.volume_24h);
 
       const change24h = price - open24h;
-      const changePercent24h =
-        Math.round((change24h / open24h) * 100 * 100) / 100;
+      const changePercent24h = (
+        Math.round((change24h / open24h) * 100 * 100) / 100
+      ).toFixed(2);
 
       console.log('aa', changePercent24h);
 
@@ -102,7 +103,7 @@ export function initWebSocketServer(server: Server): void {
         symbol,
         price,
         change24h,
-        changePercent24h,
+        changePercent24h: parseFloat(changePercent24h),
         volume24h,
         chartData,
       };
