@@ -15,10 +15,10 @@ class TransactionInitiator {
 
 class TransactionNetwork {
   @prop({ required: true })
-  public address!: string;
+  public id!: string;
 
   @prop({ required: true })
-  public platform!: string;
+  public name!: string;
 }
 
 class TransactionAsset {
