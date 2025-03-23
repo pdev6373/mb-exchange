@@ -42,21 +42,37 @@ export class AssetController {
   @Validate(AddAssetSchema)
   @Security('BearerAuth', Object.values(Role))
   public async createAsset(@Body() data: IAddAssetInput) {
-    const { name, networks, rate, symbol, vipRate, icon } = data;
+    const {
+      name,
+      networkAddresses,
+      rate,
+      symbol,
+      vipRate,
+      image,
+      platforms,
+      description,
+      isActive,
+      cryptoId,
+    } = data;
+
     const existingAsset = await AssetModel.findOne({
-      $or: [{ symbol }, { name }],
+      cryptoId,
     });
-    if (existingAsset)
-      throw new BadRequestError('Asset with this symbol already exists');
+
+    if (existingAsset) throw new BadRequestError('Asset already exists');
 
     const asset = await AssetModel.create({
       name,
-      networks,
-      rate,
       symbol,
+      image,
+      rate,
       vipRate: vipRate || rate,
-      icon,
+      networkAddresses,
+      platforms,
+      description,
+      isActive: isActive ?? true,
     });
+
     return successResponse('Asset created successfully', asset.toJSON());
   }
 
@@ -67,28 +83,41 @@ export class AssetController {
     @Path() id: string,
     @Body() data: IUpdateAssetInput,
   ) {
-    const { name, networks, rate, symbol, vipRate } = data;
+    const {
+      name,
+      networkAddresses,
+      rate,
+      symbol,
+      vipRate,
+      image,
+      platforms,
+      description,
+      isActive,
+      cryptoId,
+    } = data;
 
     const asset = await AssetModel.findById(id);
     if (!asset) throw new NotFoundError('Asset not found');
 
-    if (name || symbol) {
+    if (cryptoId) {
       const existingAsset = await AssetModel.findOne({
-        $or: [{ symbol }, { name }],
+        cryptoId,
         _id: { $ne: id },
       });
 
       if (existingAsset)
-        throw new BadRequestError(
-          'Asset with this symbol or name already exists',
-        );
+        throw new BadRequestError('Asset with this id already exists');
     }
 
     if (name) asset.name = name;
-    if (rate) asset.rate = rate;
-    if (vipRate) asset.vipRate = vipRate;
     if (symbol) asset.symbol = symbol;
-    if (networks?.length) asset.networks = networks;
+    if (rate) asset.rate = rate;
+    if (vipRate !== undefined) asset.vipRate = vipRate;
+    if (image !== undefined) asset.image = image;
+    if (platforms !== undefined) asset.platforms = platforms;
+    if (description !== undefined) asset.description = description;
+    if (isActive !== undefined) asset.isActive = isActive;
+    if (networkAddresses?.length) asset.networkAddresses = networkAddresses;
 
     await asset.save();
     return successResponse('Asset updated successfully', asset.toJSON());

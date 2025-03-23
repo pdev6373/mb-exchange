@@ -1,35 +1,43 @@
-import { prop, getModelForClass, modelOptions } from '@typegoose/typegoose';
+import { prop, getModelForClass } from '@typegoose/typegoose';
 
-export class CryptoNetwork {
+class NetworkAddress {
   @prop({ required: true })
-  public name!: string;
+  public platform!: string;
 
   @prop({ required: true })
   public address!: string;
-
-  @prop({ default: 'https://icon.png' })
-  public icon?: string;
 }
 
-@modelOptions({ schemaOptions: { timestamps: true } })
 export class Asset {
-  @prop({ required: true, unique: true })
-  public name!: string;
-
-  @prop({ required: true, unique: true })
-  public symbol!: string;
+  @prop({ required: true })
+  public cryptoId!: string;
 
   @prop({ required: true })
-  public icon!: string;
+  public name!: string;
+
+  @prop({ required: true })
+  public symbol!: string;
+
+  @prop()
+  public image?: string;
 
   @prop({ required: true })
   public rate!: number;
 
-  @prop({ required: true })
-  public vipRate!: number;
+  @prop()
+  public vipRate?: number;
 
-  @prop({ type: () => [CryptoNetwork], default: [] })
-  public networks!: CryptoNetwork[];
+  @prop()
+  public description?: string;
+
+  @prop({ type: () => Object })
+  public platforms?: Record<string, string>;
+
+  @prop({ default: true })
+  public isActive?: boolean;
+
+  @prop({ type: () => [NetworkAddress], _id: false, default: [] })
+  public networkAddresses!: NetworkAddress[];
 }
 
 export const AssetModel = getModelForClass(Asset, {
