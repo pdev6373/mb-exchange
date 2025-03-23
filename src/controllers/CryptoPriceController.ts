@@ -1,4 +1,3 @@
-// In your CryptoPriceController.ts
 import WebSocket from 'ws';
 import { Server } from 'http';
 import axios from 'axios';
@@ -30,8 +29,8 @@ const historyCache = new Map<
   }
 >();
 
-// Cache expiration time (in milliseconds)
-const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutes
+// Cache expiration time for historical data (24 hours)
+const HISTORICAL_CACHE_EXPIRATION = 24 * 60 * 60 * 1000;
 
 export function initWebSocketServer(server: Server): void {
   const wss = new WebSocket.Server({ server });
@@ -73,7 +72,10 @@ export function initWebSocketServer(server: Server): void {
       const cachedHistory = historyCache.get(symbol);
       const now = Date.now();
 
-      if (cachedHistory && now - cachedHistory.lastFetched < CACHE_EXPIRATION) {
+      if (
+        cachedHistory &&
+        now - cachedHistory.lastFetched < HISTORICAL_CACHE_EXPIRATION
+      ) {
         // Use cached data if it's fresh
         chartData = cachedHistory.data;
         console.log(
@@ -149,23 +151,31 @@ export function initWebSocketServer(server: Server): void {
   });
 
   // Periodically refresh historical data in the background
-  // This ensures data is always fresh without delaying ticker updates
   setInterval(() => {
     symbols.forEach(async (symbol) => {
-      console.log(`Background refresh of historical data for ${symbol}`);
-      const chartData = await fetchHistoricalDataFromCoinbase(symbol);
-      historyCache.set(symbol, {
-        data: chartData,
-        lastFetched: Date.now(),
-      });
+      const cachedHistory = historyCache.get(symbol);
+      const now = Date.now();
 
-      // If we have a latest price update, update its chart data
-      const latest = latestUpdates.get(symbol);
-      if (latest) {
-        latest.chartData = chartData;
+      // Refresh only if cache is expired or missing
+      if (
+        !cachedHistory ||
+        now - cachedHistory.lastFetched >= HISTORICAL_CACHE_EXPIRATION
+      ) {
+        console.log(`Background refresh of historical data for ${symbol}`);
+        const chartData = await fetchHistoricalDataFromCoinbase(symbol);
+        historyCache.set(symbol, {
+          data: chartData,
+          lastFetched: now,
+        });
+
+        // If we have a latest price update, update its chart data
+        const latest = latestUpdates.get(symbol);
+        if (latest) {
+          latest.chartData = chartData;
+        }
       }
     });
-  }, 5 * 60 * 1000); // Refresh every 5 minutes
+  }, 60 * 60 * 1000); // Refresh every hour (adjust as needed)
 
   process.on('SIGINT', () => {
     coinbaseWs.close();
@@ -175,13 +185,12 @@ export function initWebSocketServer(server: Server): void {
   });
 }
 
-// Same historical data function but with better error handling
 async function fetchHistoricalDataFromCoinbase(
   symbol: string,
 ): Promise<CandleData[]> {
-  const granularity = 3600;
-  const end = Math.floor(Date.now() / 1000);
-  const start = end - 24 * 60 * 60;
+  const granularity = 86400; // 24-hour candlesticks
+  const end = Math.floor(Date.now() / 1000); // Current time in seconds
+  const start = end - 300 * granularity; // 300 days ago
 
   const response = await axios.get(
     `https://api.exchange.coinbase.com/products/${symbol}/candles`,
@@ -191,14 +200,12 @@ async function fetchHistoricalDataFromCoinbase(
         start,
         end,
       },
-      headers: {
-        'User-Agent': 'YourAppName/1.0', // Add identification to help Coinbase track your usage
-      },
     },
   );
 
+  // Map the response data to the CandleData format
   return response.data.map((candle: number[]) => ({
-    timestamp: candle[0] * 1000,
+    timestamp: candle[0] * 1000, // Convert to milliseconds
     low: candle[1],
     high: candle[2],
     open: candle[3],
