@@ -204,8 +204,8 @@ const models: TsoaRoute.Models = {
     "TransactionNetwork": {
         "dataType": "refObject",
         "properties": {
-            "id": {"dataType":"string","required":true},
-            "name": {"dataType":"string","required":true},
+            "address": {"dataType":"string","required":true},
+            "platform": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -237,7 +237,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "assetId": {"dataType":"string","required":true},
-            "networkId": {"dataType":"string","required":true},
             "address": {"dataType":"string","required":true},
             "quantity": {"dataType":"double","required":true},
             "proof": {"dataType":"string","required":true},
@@ -401,7 +400,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "mongoose.FlattenMaps__name-string--symbol-string--icon-string--rate-number--vipRate-number--networks_58__name-string--address-string--icon_63_-string_-Array__": {
+    "mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--vipRate_63_-number--description_63_-string--platforms_63__58___91_x-string_93__58_string_--isActive_63_-boolean--networkAddresses_58__platform-string--address-string_-Array__": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
     },
@@ -411,15 +410,24 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IAddAssetInput": {
         "dataType": "refObject",
         "properties": {
+            "cryptoId": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
-            "icon": {"dataType":"string","required":true},
             "symbol": {"dataType":"string","required":true},
+            "image": {"dataType":"string"},
             "rate": {"dataType":"double","required":true},
-            "vipRate": {"dataType":"double"},
-            "networks": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"icon":{"dataType":"string"},"address":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},"required":true},
+            "vipRate": {"dataType":"double","required":true},
+            "description": {"dataType":"string"},
+            "platforms": {"ref":"Record_string.string_"},
+            "isActive": {"dataType":"boolean"},
+            "networkAddresses": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"address":{"dataType":"string","required":true},"platform":{"dataType":"string","required":true}}},"required":true},
         },
         "additionalProperties": false,
     },
@@ -427,12 +435,11 @@ const models: TsoaRoute.Models = {
     "IUpdateAssetInput": {
         "dataType": "refObject",
         "properties": {
-            "name": {"dataType":"string"},
-            "icon": {"dataType":"string"},
-            "symbol": {"dataType":"string"},
             "rate": {"dataType":"double"},
             "vipRate": {"dataType":"double"},
-            "networks": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"icon":{"dataType":"string"},"address":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}}},
+            "platforms": {"ref":"Record_string.string_"},
+            "isActive": {"dataType":"boolean"},
+            "networkAddresses": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"address":{"dataType":"string","required":true},"platform":{"dataType":"string","required":true}}}},
         },
         "additionalProperties": false,
     },

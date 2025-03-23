@@ -20,6 +20,8 @@ import {
   UpdateAssetSchema,
 } from '../schemas/asset';
 import { Role } from '../schemas/admin';
+import { TransactionModel } from '../models/Transaction';
+import { TransactionStatus } from '../schemas/user';
 
 @Tags('Assets')
 @Route('assets')
@@ -83,39 +85,14 @@ export class AssetController {
     @Path() id: string,
     @Body() data: IUpdateAssetInput,
   ) {
-    const {
-      name,
-      networkAddresses,
-      rate,
-      symbol,
-      vipRate,
-      image,
-      platforms,
-      description,
-      isActive,
-      cryptoId,
-    } = data;
+    const { networkAddresses, rate, vipRate, platforms, isActive } = data;
 
     const asset = await AssetModel.findById(id);
     if (!asset) throw new NotFoundError('Asset not found');
 
-    if (cryptoId) {
-      const existingAsset = await AssetModel.findOne({
-        cryptoId,
-        _id: { $ne: id },
-      });
-
-      if (existingAsset)
-        throw new BadRequestError('Asset with this id already exists');
-    }
-
-    if (name) asset.name = name;
-    if (symbol) asset.symbol = symbol;
     if (rate) asset.rate = rate;
     if (vipRate !== undefined) asset.vipRate = vipRate;
-    if (image !== undefined) asset.image = image;
     if (platforms !== undefined) asset.platforms = platforms;
-    if (description !== undefined) asset.description = description;
     if (isActive !== undefined) asset.isActive = isActive;
     if (networkAddresses?.length) asset.networkAddresses = networkAddresses;
 
@@ -126,8 +103,17 @@ export class AssetController {
   @Delete('/:id')
   @Security('BearerAuth', Object.values(Role))
   public async deleteAsset(@Path() id: string) {
-    const asset = await AssetModel.findByIdAndDelete(id);
+    const asset = await AssetModel.findById(id);
     if (!asset) throw new NotFoundError('Asset not found');
+    const transactionExist = await TransactionModel.findOne({
+      'asset.id': asset._id,
+      status: TransactionStatus.PENDING,
+    });
+
+    if (transactionExist)
+      throw new BadRequestError('Pending transaction exists for this asset');
+
+    await asset.deleteOne();
     return successResponse('Asset deleted successfully');
   }
 }

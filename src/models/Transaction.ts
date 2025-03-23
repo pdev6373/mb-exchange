@@ -13,15 +13,15 @@ class TransactionInitiator {
   public lastName!: string;
 }
 
-class TransactionAsset {
+class TransactionNetwork {
   @prop({ required: true })
-  public id!: string;
+  public address!: string;
 
   @prop({ required: true })
-  public name!: string;
+  public platform!: string;
 }
 
-class TransactionNetwork {
+class TransactionAsset {
   @prop({ required: true })
   public id!: string;
 

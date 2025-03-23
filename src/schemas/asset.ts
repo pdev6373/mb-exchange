@@ -35,13 +35,8 @@ export interface IAddAssetInput {
 }
 
 export const UpdateAssetSchema = z.object({
-  cryptoId: z.string().min(1, 'Crypto ID is required').optional(),
-  name: z.string().min(1, 'Asset name is required').optional(),
-  symbol: z.string().min(1, 'Asset symbol is required').optional(),
-  image: z.string().url({ message: 'Invalid URL' }).optional(),
   rate: z.number().positive('Rate must be a positive number').optional(),
   vipRate: z.number().positive('VIP rate must be a positive number').optional(),
-  description: z.string().optional(),
   platforms: z.record(z.string(), z.string()).optional(),
   isActive: z.boolean().optional(),
   networkAddresses: z
@@ -55,13 +50,8 @@ export const UpdateAssetSchema = z.object({
 });
 
 export interface IUpdateAssetInput {
-  cryptoId?: string;
-  name?: string;
-  symbol?: string;
-  image?: string;
   rate?: number;
   vipRate?: number;
-  description?: string;
   platforms?: Record<string, string>;
   isActive?: boolean;
   networkAddresses?: {

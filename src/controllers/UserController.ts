@@ -43,7 +43,7 @@ import {
 } from '../utils/helpers';
 import bcrypt from 'bcryptjs';
 import { Transaction, TransactionModel } from '../models/Transaction';
-import { AssetModel, CryptoNetwork } from '../models/Asset';
+import { AssetModel } from '../models/Asset';
 import { Reward, RewardModel } from '../models/Reward';
 import { ObjectId } from 'mongoose';
 import { CountModel } from '../models/Count';
@@ -343,16 +343,13 @@ export class UserController {
     @Body() data: IMakeTransactionInput,
     @Request() req: ExpressRequest,
   ) {
-    const { assetId, address, quantity, proof, networkId } = data;
+    const { assetId, address, quantity, proof } = data;
     const assetExist = await AssetModel.findById(assetId);
     if (!assetExist) throw new NotFoundError('Asset not found');
 
-    const networks = assetExist.networks as (CryptoNetwork & {
-      _id: ObjectId;
-    })[];
-
+    const networks = assetExist.networkAddresses;
     const networkExist = networks.find(
-      (network) => network._id?.toString() === networkId,
+      (network) => network.address === address,
     );
 
     if (!networkExist) throw new NotFoundError('Network not found');
@@ -374,8 +371,8 @@ export class UserController {
         name: assetExist.name,
       },
       network: {
-        id: networkExist._id,
-        name: networkExist.name,
+        address: networkExist.address,
+        platform: networkExist.platform,
       },
       quantity,
       address,
