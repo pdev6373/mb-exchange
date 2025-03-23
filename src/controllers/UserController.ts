@@ -343,17 +343,17 @@ export class UserController {
     @Body() data: IMakeTransactionInput,
     @Request() req: ExpressRequest,
   ) {
-    const { assetId, address, quantity, proof, networkId } = data;
+    const { assetId, address, quantity, proof, platformId } = data;
     const assetExist = await AssetModel.findById(assetId);
     if (!assetExist) throw new NotFoundError('Asset not found');
 
-    const networks = assetExist.networkAddresses;
-    const networkExist = networks.find(
-      (network: any) => network._id === networkId,
+    const platforms = assetExist.platformAddresses;
+    const platformExist = platforms.find(
+      (platform: any) => platform._id === platform,
     );
 
-    if (!networkExist) throw new NotFoundError('Network not found');
-    if (networkExist.address !== address)
+    if (!platformExist) throw new NotFoundError('Platform not found');
+    if (platformExist.address !== address)
       throw new BadRequestError('Invalid address');
 
     const user = req.user as unknown as User & {
@@ -370,10 +370,10 @@ export class UserController {
         id: assetExist._id,
         name: assetExist.name,
       },
-      network: {
-        id: (networkExist as any)._id,
-        platform: networkExist.platform,
-        address: networkExist.address,
+      platform: {
+        id: (platformExist as any)._id,
+        platform: platformExist.platform,
+        address: platformExist.address,
       },
       quantity,
       address,

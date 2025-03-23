@@ -13,12 +13,15 @@ class TransactionInitiator {
   public lastName!: string;
 }
 
-class TransactionNetwork {
+class TransactionPlatform {
   @prop({ required: true })
   public id!: string;
 
   @prop({ required: true })
-  public name!: string;
+  public platform!: string;
+
+  @prop({ required: true })
+  public address!: string;
 }
 
 class TransactionAsset {
@@ -37,7 +40,7 @@ export class Transaction {
   public asset!: TransactionAsset;
 
   @prop({ _id: false })
-  public network!: TransactionNetwork;
+  public platform!: TransactionPlatform;
 
   @prop({ required: true })
   public key!: string;

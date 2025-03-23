@@ -287,7 +287,7 @@ export class AdminController {
       filter.$or = [
         { key: { $regex: search, $options: 'i' } },
         { 'asset.name': { $regex: search, $options: 'i' } },
-        { 'network.name': { $regex: search, $options: 'i' } },
+        { 'platform.name': { $regex: search, $options: 'i' } },
         { address: { $regex: search, $options: 'i' } },
         { status: { $regex: search, $options: 'i' } },
       ];
