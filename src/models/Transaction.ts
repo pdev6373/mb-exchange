@@ -15,9 +15,6 @@ class TransactionInitiator {
 
 class TransactionPlatform {
   @prop({ required: true })
-  public id!: string;
-
-  @prop({ required: true })
   public platform!: string;
 
   @prop({ required: true })

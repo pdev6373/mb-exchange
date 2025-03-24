@@ -343,14 +343,12 @@ export class UserController {
     @Body() data: IMakeTransactionInput,
     @Request() req: ExpressRequest,
   ) {
-    const { assetId, address, quantity, proof, platformId } = data;
+    const { assetId, address, quantity, proof, platform } = data;
     const assetExist = await AssetModel.findById(assetId);
     if (!assetExist) throw new NotFoundError('Asset not found');
 
     const platforms = assetExist.platformAddresses;
-    const platformExist = platforms.find(
-      (platform: any) => platform._id === platformId,
-    );
+    const platformExist = platforms.find((pl) => pl.platform === platform);
 
     if (!platformExist) throw new NotFoundError('Platform not found');
     if (platformExist.address !== address)
@@ -371,7 +369,6 @@ export class UserController {
         name: assetExist.name,
       },
       platform: {
-        id: (platformExist as any)._id,
         platform: platformExist.platform,
         address: platformExist.address,
       },

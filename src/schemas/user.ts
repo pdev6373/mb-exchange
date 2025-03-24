@@ -90,7 +90,7 @@ export interface IEnableNotificationsInput {
 
 export const MakeTransactionSchema = z.object({
   assetId: z.string().min(1, 'Asset is required'),
-  platformId: z.string().min(1, 'Platform is required'),
+  platform: z.string().min(1, 'Platform is required'),
   address: z.string().min(1, 'Platform name is required'),
   quantity: z.number().gte(1, { message: 'Quantity must be at least 1' }),
   proof: z
@@ -101,7 +101,7 @@ export const MakeTransactionSchema = z.object({
 
 export interface IMakeTransactionInput {
   assetId: string;
-  platformId: string;
+  platform: string;
   address: string;
   quantity: number;
   proof: string;
