@@ -426,17 +426,21 @@ async function fetchHistoricalDataFromCoinbase(
       granularity = 21600;
       timeRange = 7 * 24 * 60 * 60;
       break;
-    case '30d':
+    case '1m':
       granularity = 86400;
       timeRange = 30 * 24 * 60 * 60;
       break;
+    case '3m':
+      granularity = 86400;
+      timeRange = 90 * 24 * 60 * 60;
+      break;
+    case '6m':
+      granularity = 86400;
+      timeRange = 180 * 24 * 60 * 60;
+      break;
     case '1y':
-    case '2y':
-    case 'all':
-      // For longer periods, let's use the maximum number of candles
-      // the API can return in a single request (typically 300)
-      granularity = 86400; // Daily candles
-      timeRange = 300 * 86400; // Get the most recent 300 days
+      granularity = 86400;
+      timeRange = 300 * 86400;
       break;
     case '1d':
     default:
