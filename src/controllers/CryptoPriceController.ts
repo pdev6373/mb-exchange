@@ -431,16 +431,12 @@ async function fetchHistoricalDataFromCoinbase(
       timeRange = 30 * 24 * 60 * 60;
       break;
     case '1y':
-      granularity = 86400;
-      timeRange = 365 * 24 * 60 * 60;
-      break;
     case '2y':
-      granularity = 86400;
-      timeRange = 2 * 365 * 24 * 60 * 60;
-      break;
     case 'all':
-      granularity = 86400;
-      timeRange = 10 * 365 * 24 * 60 * 60;
+      // For longer periods, let's use the maximum number of candles
+      // the API can return in a single request (typically 300)
+      granularity = 86400; // Daily candles
+      timeRange = 300 * 86400; // Get the most recent 300 days
       break;
     case '1d':
     default:
@@ -452,11 +448,6 @@ async function fetchHistoricalDataFromCoinbase(
   const start = end - timeRange;
 
   try {
-    // For longer periods, we might need to make multiple requests due to API limits
-    if (period === '1y' || period === '2y' || period === 'all') {
-      return await fetchHistoricalDataInChunks(symbol, granularity, start, end);
-    }
-
     const response = await axios.get(
       `https://api.exchange.coinbase.com/products/${symbol}/candles`,
       {
@@ -469,7 +460,7 @@ async function fetchHistoricalDataFromCoinbase(
     );
 
     // Transform the Coinbase response to our CandleData format
-    return response.data.map((candle: number[]) => ({
+    const candles = response.data.map((candle: number[]) => ({
       timestamp: candle[0] * 1000,
       low: candle[1],
       high: candle[2],
@@ -477,60 +468,11 @@ async function fetchHistoricalDataFromCoinbase(
       close: candle[4],
       volume: candle[5],
     }));
+
+    // Reverse the array to get oldest to newest ordering
+    return candles.reverse();
   } catch (error) {
     console.error(`Error fetching historical data for ${symbol}:`, error);
     return [];
   }
-}
-
-// Fetch historical data in chunks for longer periods
-async function fetchHistoricalDataInChunks(
-  symbol: string,
-  granularity: number,
-  start: number,
-  end: number,
-): Promise<CandleData[]> {
-  // Coinbase API has a limit of ~300 candles per request
-  const maxCandlesPerRequest = 300;
-  const chunkSize = granularity * maxCandlesPerRequest;
-
-  let result: CandleData[] = [];
-  let currentStart = start;
-
-  while (currentStart < end) {
-    const currentEnd = Math.min(currentStart + chunkSize, end);
-
-    try {
-      const response = await axios.get(
-        `https://api.exchange.coinbase.com/products/${symbol}/candles`,
-        {
-          params: {
-            granularity,
-            start: currentStart,
-            end: currentEnd,
-          },
-        },
-      );
-
-      const candles = response.data.map((candle: number[]) => ({
-        timestamp: candle[0] * 1000,
-        low: candle[1],
-        high: candle[2],
-        open: candle[3],
-        close: candle[4],
-        volume: candle[5],
-      }));
-
-      result = [...result, ...candles];
-
-      // Add delay to avoid rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    } catch (error) {
-      console.error(`Error fetching historical chunk for ${symbol}:`, error);
-    }
-
-    currentStart = currentEnd;
-  }
-
-  return result;
 }
