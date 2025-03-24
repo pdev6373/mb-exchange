@@ -58,11 +58,6 @@ app.use(
   upload.single('file'),
 );
 
-// Add a simple endpoint to check if the Binance relay is working
-app.get('/api/crypto/ping', (req, res) => {
-  res.json({ success: true, message: 'Binance relay service is running' });
-});
-
 RegisterRoutes(app);
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerJson));
@@ -93,8 +88,4 @@ app.use(
   },
 );
 
-// Initialize WebSocket server after Express setup
-initWebSocketServer(server);
-
-// Export the HTTP server instead of the Express app
-export default server;
+export { app, server };

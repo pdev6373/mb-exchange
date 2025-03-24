@@ -22,7 +22,6 @@ interface CandleData {
   volume: number;
 }
 
-// Cache for historical data
 const historyCache = new Map<
   string,
   {
@@ -32,7 +31,7 @@ const historyCache = new Map<
   }
 >();
 
-const HISTORICAL_CACHE_EXPIRATION = 30 * 60 * 1000; // 30 minutes
+const HISTORICAL_CACHE_EXPIRATION = 30 * 60 * 1000;
 
 export async function initWebSocketServer(server: Server) {
   const wss = new WebSocket.Server({ server });

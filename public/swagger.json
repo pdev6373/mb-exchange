@@ -397,18 +397,18 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"TransactionNetwork": {
+			"TransactionPlatform": {
 				"properties": {
-					"address": {
+					"platform": {
 						"type": "string"
 					},
-					"platform": {
+					"address": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"address",
-					"platform"
+					"platform",
+					"address"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -430,8 +430,8 @@
 					"asset": {
 						"$ref": "#/components/schemas/TransactionAsset"
 					},
-					"network": {
-						"$ref": "#/components/schemas/TransactionNetwork"
+					"platform": {
+						"$ref": "#/components/schemas/TransactionPlatform"
 					},
 					"key": {
 						"type": "string"
@@ -465,7 +465,7 @@
 				"required": [
 					"user",
 					"asset",
-					"network",
+					"platform",
 					"key",
 					"address",
 					"quantity",
@@ -482,6 +482,9 @@
 					"assetId": {
 						"type": "string"
 					},
+					"platform": {
+						"type": "string"
+					},
 					"address": {
 						"type": "string"
 					},
@@ -495,6 +498,7 @@
 				},
 				"required": [
 					"assetId",
+					"platform",
 					"address",
 					"quantity",
 					"proof"
@@ -791,21 +795,13 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--vipRate_63_-number--description_63_-string--platforms_63__58___91_x-string_93__58_string_--isActive_63_-boolean--networkAddresses_58__platform-string--address-string_-Array__": {
+			"mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--vipRate_63_-number--description_63_-string--hasPlatforms-boolean--isActive_63_-boolean--platformAddresses_58__platform-string--address-string_-Array__": {
 				"properties": {},
 				"type": "object"
 			},
 			"mongoose.FlattenMaps_Asset-and-__id-mongoose.Types.ObjectId_-and-___v-number__": {
 				"properties": {},
 				"type": "object"
-			},
-			"Record_string.string_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "string"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
 			},
 			"IAddAssetInput": {
 				"properties": {
@@ -832,13 +828,13 @@
 					"description": {
 						"type": "string"
 					},
-					"platforms": {
-						"$ref": "#/components/schemas/Record_string.string_"
+					"hasPlatforms": {
+						"type": "boolean"
 					},
 					"isActive": {
 						"type": "boolean"
 					},
-					"networkAddresses": {
+					"platformAddresses": {
 						"items": {
 							"properties": {
 								"address": {
@@ -862,8 +858,8 @@
 					"name",
 					"symbol",
 					"rate",
-					"vipRate",
-					"networkAddresses"
+					"hasPlatforms",
+					"platformAddresses"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -878,13 +874,13 @@
 						"type": "number",
 						"format": "double"
 					},
-					"platforms": {
-						"$ref": "#/components/schemas/Record_string.string_"
+					"hasPlatforms": {
+						"type": "boolean"
 					},
 					"isActive": {
 						"type": "boolean"
 					},
-					"networkAddresses": {
+					"platformAddresses": {
 						"items": {
 							"properties": {
 								"address": {
@@ -2900,7 +2896,7 @@
 											"items": {
 												"allOf": [
 													{
-														"$ref": "#/components/schemas/mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--vipRate_63_-number--description_63_-string--platforms_63__58___91_x-string_93__58_string_--isActive_63_-boolean--networkAddresses_58__platform-string--address-string_-Array__"
+														"$ref": "#/components/schemas/mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--vipRate_63_-number--description_63_-string--hasPlatforms-boolean--isActive_63_-boolean--platformAddresses_58__platform-string--address-string_-Array__"
 													},
 													{
 														"properties": {
@@ -3021,7 +3017,7 @@
 										"data": {
 											"allOf": [
 												{
-													"$ref": "#/components/schemas/mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--vipRate_63_-number--description_63_-string--platforms_63__58___91_x-string_93__58_string_--isActive_63_-boolean--networkAddresses_58__platform-string--address-string_-Array__"
+													"$ref": "#/components/schemas/mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--vipRate_63_-number--description_63_-string--hasPlatforms-boolean--isActive_63_-boolean--platformAddresses_58__platform-string--address-string_-Array__"
 												},
 												{
 													"properties": {

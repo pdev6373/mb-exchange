@@ -201,11 +201,11 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "TransactionNetwork": {
+    "TransactionPlatform": {
         "dataType": "refObject",
         "properties": {
-            "address": {"dataType":"string","required":true},
             "platform": {"dataType":"string","required":true},
+            "address": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -220,7 +220,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "user": {"ref":"TransactionInitiator","required":true},
             "asset": {"ref":"TransactionAsset","required":true},
-            "network": {"ref":"TransactionNetwork","required":true},
+            "platform": {"ref":"TransactionPlatform","required":true},
             "key": {"dataType":"string","required":true},
             "address": {"dataType":"string","required":true},
             "quantity": {"dataType":"double","required":true},
@@ -237,6 +237,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "assetId": {"dataType":"string","required":true},
+            "platform": {"dataType":"string","required":true},
             "address": {"dataType":"string","required":true},
             "quantity": {"dataType":"double","required":true},
             "proof": {"dataType":"string","required":true},
@@ -400,7 +401,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--vipRate_63_-number--description_63_-string--platforms_63__58___91_x-string_93__58_string_--isActive_63_-boolean--networkAddresses_58__platform-string--address-string_-Array__": {
+    "mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--vipRate_63_-number--description_63_-string--hasPlatforms-boolean--isActive_63_-boolean--platformAddresses_58__platform-string--address-string_-Array__": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
     },
@@ -408,11 +409,6 @@ const models: TsoaRoute.Models = {
     "mongoose.FlattenMaps_Asset-and-__id-mongoose.Types.ObjectId_-and-___v-number__": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Record_string.string_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IAddAssetInput": {
@@ -423,11 +419,11 @@ const models: TsoaRoute.Models = {
             "symbol": {"dataType":"string","required":true},
             "image": {"dataType":"string"},
             "rate": {"dataType":"double","required":true},
-            "vipRate": {"dataType":"double","required":true},
+            "vipRate": {"dataType":"double"},
             "description": {"dataType":"string"},
-            "platforms": {"ref":"Record_string.string_"},
+            "hasPlatforms": {"dataType":"boolean","required":true},
             "isActive": {"dataType":"boolean"},
-            "networkAddresses": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"address":{"dataType":"string","required":true},"platform":{"dataType":"string","required":true}}},"required":true},
+            "platformAddresses": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"address":{"dataType":"string","required":true},"platform":{"dataType":"string","required":true}}},"required":true},
         },
         "additionalProperties": false,
     },
@@ -437,9 +433,9 @@ const models: TsoaRoute.Models = {
         "properties": {
             "rate": {"dataType":"double"},
             "vipRate": {"dataType":"double"},
-            "platforms": {"ref":"Record_string.string_"},
+            "hasPlatforms": {"dataType":"boolean"},
             "isActive": {"dataType":"boolean"},
-            "networkAddresses": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"address":{"dataType":"string","required":true},"platform":{"dataType":"string","required":true}}}},
+            "platformAddresses": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"address":{"dataType":"string","required":true},"platform":{"dataType":"string","required":true}}}},
         },
         "additionalProperties": false,
     },

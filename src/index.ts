@@ -1,16 +1,25 @@
 import 'reflect-metadata';
 import mongoose from 'mongoose';
-import server from './app';
+import { app, server } from './app';
+import { initWebSocketServer } from './controllers/CryptoPriceController';
 
 const PORT = Number(process.env.PORT) || 3000;
 const DATABASE_URI = process.env.DATABASE_URI!;
 
 mongoose
-  .connect(DATABASE_URI)
+  .connect(DATABASE_URI, {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    waitQueueTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+  })
   .then(() => {
     console.log('Connected to MongoDB');
+
+    // Initialize WebSocket server after MongoDB connection
+    initWebSocketServer(server);
+
     server.listen(PORT, () => {
-      // Bind to all interfaces
       console.log(`Server running on http://192.168.80.27:${PORT}`);
       console.log(`Server also accessible on http://localhost:${PORT}`);
       console.log(`WebSocket server is also running on the same port`);
