@@ -119,7 +119,7 @@ export async function initWebSocketServer(server: Server) {
         );
       } else {
         console.log(`Fetching fresh historical data for ${symbol}`);
-        chartData = await fetchHistoricalDataFromCoinbase(symbol, '24h');
+        chartData = await fetchHistoricalDataFromCoinbase(symbol, '1d');
 
         historyCache.set(cacheKey, {
           period: '24h',
@@ -414,39 +414,37 @@ async function fetchAssetDetailsFromAPI(symbol: string): Promise<AssetDetails> {
   }
 }
 
-// Fetch historical price data with different timeframes
 async function fetchHistoricalDataFromCoinbase(
   symbol: string,
-  period: string = '24h',
+  period: string = '1d',
 ): Promise<CandleData[]> {
   let granularity: number;
   let timeRange: number;
 
-  // Set appropriate granularity and time range based on period
   switch (period) {
     case '7d':
-      granularity = 14400; // 4 hours
+      granularity = 21600;
       timeRange = 7 * 24 * 60 * 60;
       break;
     case '30d':
-      granularity = 86400; // 1 day
+      granularity = 86400;
       timeRange = 30 * 24 * 60 * 60;
       break;
     case '1y':
-      granularity = 86400; // 1 day
+      granularity = 86400;
       timeRange = 365 * 24 * 60 * 60;
       break;
     case '2y':
-      granularity = 172800; // 2 days
+      granularity = 86400;
       timeRange = 2 * 365 * 24 * 60 * 60;
       break;
     case 'all':
-      granularity = 604800; // 1 week
-      timeRange = 10 * 365 * 24 * 60 * 60; // 10 years
+      granularity = 86400;
+      timeRange = 10 * 365 * 24 * 60 * 60;
       break;
-    case '24h':
+    case '1d':
     default:
-      granularity = 3600; // 1 hour
+      granularity = 3600;
       timeRange = 24 * 60 * 60;
   }
 
