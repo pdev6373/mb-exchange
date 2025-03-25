@@ -27,6 +27,9 @@ class TransactionAsset {
 
   @prop({ required: true })
   public name!: string;
+
+  @prop({ required: true })
+  public symbol!: string;
 }
 
 export class Transaction {

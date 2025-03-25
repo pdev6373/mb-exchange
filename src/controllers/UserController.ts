@@ -353,6 +353,7 @@ export class UserController {
       asset: {
         id: assetExist._id,
         name: assetExist.name,
+        symbol: assetExist.symbol,
       },
       platform: {
         platform: platformExist.platform,
