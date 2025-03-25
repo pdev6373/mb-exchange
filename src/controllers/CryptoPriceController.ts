@@ -32,6 +32,9 @@ const historyCache = new Map<
 >();
 
 const HISTORICAL_CACHE_EXPIRATION = 30 * 60 * 1000;
+const MAX_RECONNECT_ATTEMPTS = 10;
+const BASE_RECONNECT_DELAY = 1000; // 1 second
+const MAX_RECONNECT_DELAY = 30000; // 30 seconds
 
 export async function initWebSocketServer(server: Server) {
   const wss = new WebSocket.Server({ server });
@@ -40,83 +43,147 @@ export async function initWebSocketServer(server: Server) {
   const clients = new Set<WebSocket>();
 
   const latestUpdates = new Map<string, MarketUpdate>();
-  const coinbaseWs = new WebSocket('wss://ws-feed.exchange.coinbase.com');
+  let coinbaseWs: WebSocket | null = null;
+  let reconnectAttempts = 0;
+  let reconnectTimer: NodeJS.Timeout | null = null;
 
-  coinbaseWs.on('open', () => {
-    console.log('Connected to Coinbase WebSocket API');
+  const connectToCoinbaseWebSocket = () => {
+    // Clear any existing reconnection timer
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+    }
 
-    const subscribeMessage = {
-      type: 'subscribe',
-      product_ids: symbols,
-      channels: ['ticker'],
-    };
-    coinbaseWs.send(JSON.stringify(subscribeMessage));
-  });
+    // Close existing connection if any
+    if (coinbaseWs) {
+      coinbaseWs.close();
+    }
 
-  coinbaseWs.on('message', async (data) => {
-    const message = JSON.parse(data.toString());
+    // Create new WebSocket connection
+    coinbaseWs = new WebSocket('wss://ws-feed.exchange.coinbase.com');
 
-    if (message.type === 'ticker') {
-      const symbol = message.product_id;
-      const price = parseFloat(message.price);
-      const open24h = parseFloat(message.open_24h);
-      const volume24h = parseFloat(message.volume_24h);
+    coinbaseWs.on('open', () => {
+      console.log('Connected to Coinbase WebSocket API');
 
-      const change24h = price - open24h;
-      const changePercent24h = (
-        Math.round((change24h / open24h) * 100 * 100) / 100
-      ).toFixed(2);
+      // Reset reconnection attempts on successful connection
+      reconnectAttempts = 0;
 
-      let chartData: CandleData[] = [];
-      const cacheKey = `${symbol}-24h`;
-      const cachedHistory = historyCache.get(cacheKey);
-      const now = Date.now();
+      const subscribeMessage = {
+        type: 'subscribe',
+        product_ids: symbols,
+        channels: ['ticker'],
+      };
+      coinbaseWs?.send(JSON.stringify(subscribeMessage));
+    });
 
-      if (
-        cachedHistory &&
-        now - cachedHistory.lastFetched < HISTORICAL_CACHE_EXPIRATION
-      ) {
-        chartData = cachedHistory.data;
-        console.log(
-          `Using cached historical data for ${symbol}, age: ${
-            (now - cachedHistory.lastFetched) / 1000
-          }s`,
-        );
-      } else {
-        console.log(`Fetching fresh historical data for ${symbol}`);
-        chartData = await fetchHistoricalDataFromCoinbase(symbol, '24h');
-        historyCache.set(cacheKey, {
-          period: '24h',
-          data: chartData,
-          lastFetched: now,
+    coinbaseWs.on('message', async (data) => {
+      const message = JSON.parse(data.toString());
+
+      if (message.type === 'ticker') {
+        const symbol = message.product_id;
+        const price = parseFloat(message.price);
+        const open24h = parseFloat(message.open_24h);
+        const volume24h = parseFloat(message.volume_24h);
+
+        const change24h = price - open24h;
+        const changePercent24h = (
+          Math.round((change24h / open24h) * 100 * 100) / 100
+        ).toFixed(2);
+
+        let chartData: CandleData[] = [];
+        const cacheKey = `${symbol}-24h`;
+        const cachedHistory = historyCache.get(cacheKey);
+        const now = Date.now();
+
+        if (
+          cachedHistory &&
+          now - cachedHistory.lastFetched < HISTORICAL_CACHE_EXPIRATION
+        ) {
+          chartData = cachedHistory.data;
+          console.log(
+            `Using cached historical data for ${symbol}, age: ${
+              (now - cachedHistory.lastFetched) / 1000
+            }s`,
+          );
+        } else {
+          console.log(`Fetching fresh historical data for ${symbol}`);
+          chartData = await fetchHistoricalDataFromCoinbase(symbol, '24h');
+          historyCache.set(cacheKey, {
+            period: '24h',
+            data: chartData,
+            lastFetched: now,
+          });
+        }
+
+        const update: MarketUpdate = {
+          symbol,
+          price,
+          change24h,
+          changePercent24h: parseFloat(changePercent24h),
+          volume24h,
+          chartData,
+        };
+
+        latestUpdates.set(symbol, update);
+        clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN)
+            client.send(
+              JSON.stringify({
+                type: 'market-update',
+                data: [update],
+              }),
+            );
         });
       }
+    });
 
-      const update: MarketUpdate = {
-        symbol,
-        price,
-        change24h,
-        changePercent24h: parseFloat(changePercent24h),
-        volume24h,
-        chartData,
-      };
+    coinbaseWs.on('error', (error) => {
+      console.error('Coinbase WebSocket error:', error);
+      reconnectWithBackoff();
+    });
 
-      latestUpdates.set(symbol, update);
-      clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN)
-          client.send(
-            JSON.stringify({
-              type: 'market-update',
-              data: [update],
-            }),
-          );
-      });
+    coinbaseWs.on('close', (code, reason) => {
+      console.log(
+        `Coinbase WebSocket closed. Code: ${code}, Reason: ${reason}`,
+      );
+      reconnectWithBackoff();
+    });
+  };
+
+  const reconnectWithBackoff = () => {
+    // Exponential backoff strategy
+    const getReconnectDelay = (attempt: number) => {
+      // Exponential backoff with jitter
+      const baseDelay = Math.min(
+        MAX_RECONNECT_DELAY,
+        BASE_RECONNECT_DELAY * Math.pow(2, attempt),
+      );
+      const jitter = Math.random() * 1000;
+      return baseDelay + jitter;
+    };
+
+    // Check if max reconnection attempts have been reached
+    if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+      console.error(
+        'Max reconnection attempts reached. Stopping reconnection attempts.',
+      );
+      return;
     }
-  });
 
-  coinbaseWs.on('error', (error) => {
-    console.error('Coinbase WebSocket error:', error);
-  });
+    const delay = getReconnectDelay(reconnectAttempts);
+    reconnectAttempts++;
+
+    console.log(
+      `Attempting to reconnect to Coinbase WebSocket (Attempt ${reconnectAttempts}). Delay: ${delay}ms`,
+    );
+
+    // Schedule reconnection
+    reconnectTimer = setTimeout(() => {
+      connectToCoinbaseWebSocket();
+    }, delay);
+  };
+
+  // Initial connection
+  connectToCoinbaseWebSocket();
 
   wss.on('connection', (ws) => {
     console.log('Client connected to WebSocket server');
@@ -226,8 +293,11 @@ export async function initWebSocketServer(server: Server) {
   });
 
   process.on('SIGINT', () => {
-    coinbaseWs.close();
+    coinbaseWs?.close();
     wss.close();
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+    }
     console.log('WebSocket server closed');
     process.exit(0);
   });
