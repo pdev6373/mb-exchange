@@ -414,11 +414,12 @@ export class UserController {
       await counts.save();
     }
 
-    await UserModel.updateOne(
+    const updatedUser = await UserModel.findOneAndUpdate(
       { _id: req.user?._id },
       { $inc: { pendingTransactions: 1, totalTransactions: 1 } },
+      { new: true },
     );
-    return successResponse('Transaction in process');
+    return successResponse('Transaction in process', updatedUser as User);
   }
 
   @Get('/reward')
