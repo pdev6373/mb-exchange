@@ -302,7 +302,7 @@ export class UserController {
   @Get('/transactions')
   public async getTransactions(@Request() req: ExpressRequest) {
     const transactions = await TransactionModel.find({
-      userId: req.user._id,
+      'user.id': req.user._id,
     })
       .sort({ createdAt: -1 })
       .lean();
