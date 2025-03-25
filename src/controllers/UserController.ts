@@ -301,30 +301,16 @@ export class UserController {
 
   @Get('/transactions')
   public async getTransactions(@Request() req: ExpressRequest) {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-
-    const skip = (page - 1) * limit;
     const transactions = await TransactionModel.find({
       userId: req.user._id,
     })
-      .skip(skip)
-      .limit(limit)
       .sort({ createdAt: -1 })
       .lean();
 
-    const total = await TransactionModel.countDocuments({
-      userId: req.user._id,
-    });
-    return successResponse('Transactions fetched successfully', {
-      transactions: transactions as Transaction[],
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
+    return successResponse(
+      'Transactions fetched successfully',
+      transactions as Transaction[],
+    );
   }
 
   @Get('/transactions/:id')
