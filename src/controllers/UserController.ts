@@ -376,7 +376,6 @@ export class UserController {
       address,
       proof,
       rate: assetExist.rate,
-      amount: quantity * Number(assetExist.rate),
       status: TransactionStatus.PENDING,
       key,
     });

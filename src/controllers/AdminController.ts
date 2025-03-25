@@ -331,10 +331,11 @@ export class AdminController {
     );
   }
 
-  @Patch('/transactions/:id/:status')
+  @Patch('/transactions/:id/:status/:amount')
   public async validateTransaction(
     @Path() id: string,
     @Path() status: TransactionStatusType,
+    @Path() amount = 0,
   ) {
     const transaction = await TransactionModel.findById(id);
     if (!transaction) throw new NotFoundError('Transaction not found');
@@ -346,10 +347,16 @@ export class AdminController {
         transaction as Transaction,
       );
 
+    if (status == 'successful' && amount <= 0)
+      throw new BadRequestError(
+        'Amount transferred in dollars must be provided',
+      );
+
     const previousStatus = transaction.status;
     transaction.status = status;
     if (status == 'pending') transaction.dateApproved = undefined;
     else transaction.dateApproved = new Date();
+    transaction.amount = amount;
     await transaction.save();
 
     if (status == 'successful') {
@@ -367,7 +374,7 @@ export class AdminController {
           : 0;
 
       if (!user.points || user?.points < 10000) {
-        user.points = (user?.points || 0) + transaction.amount;
+        user.points = (user?.points || 0) + amount;
         await user.save();
       }
     } else if (status == 'failed') {
@@ -379,7 +386,7 @@ export class AdminController {
         user.successfulTransactions = user.successfulTransactions
           ? user.successfulTransactions - 1
           : 0;
-        user.points = user?.points ? user.points - transaction.amount : 0;
+        user.points = user?.points ? user.points - amount : 0;
         await user.save();
       } else if (previousStatus == 'pending')
         user.pendingTransactions = user.pendingTransactions
@@ -394,7 +401,7 @@ export class AdminController {
         user.successfulTransactions = user.successfulTransactions
           ? user.successfulTransactions - 1
           : 0;
-        user.points = user?.points ? user.points - transaction.amount : 0;
+        user.points = user?.points ? user.points - amount : 0;
         await user.save();
       } else if (previousStatus == 'failed')
         user.failedTransactions = user.failedTransactions
