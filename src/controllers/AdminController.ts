@@ -232,10 +232,7 @@ export class AdminController {
   }
 
   @Get('/users/:id')
-  public async getUser(@Path() id: string, @Request() req: ExpressRequest) {
-    await AdminModel.findByIdAndUpdate(req?.user?._id, {
-      email: 'johndoe@gmail.com',
-    });
+  public async getUser(@Path() id: string) {
     const user = await UserModel.findById(id).select('-password -pin').lean();
     return successResponse('User fetched successfully', user as User);
   }
