@@ -315,7 +315,7 @@ export async function initWebSocketServer(server: Server) {
         try {
           const message = JSON.parse(data.toString());
           if (message.type === 'ticker') {
-            console.log('message product', message.product);
+            console.log('message product', message.product_id);
             console.log('symbols', symbols);
             const symbol = message.product_id;
             const update = await marketDataService.fetchMarketData(symbol);
