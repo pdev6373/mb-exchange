@@ -315,22 +315,26 @@ export async function initWebSocketServer(server: Server) {
         try {
           const message = JSON.parse(data.toString());
           if (message.type === 'ticker') {
-            console.log('message product', message.product_id);
+            console.log('message product_id', message.product_id);
             console.log('symbols', symbols);
             const symbol = message.product_id;
-            const update = await marketDataService.fetchMarketData(symbol);
 
-            if (update)
-              clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN) {
-                  client.send(
-                    JSON.stringify({
-                      type: 'market-update',
-                      data: [update],
-                    }),
-                  );
-                }
-              });
+            if (symbols.includes(symbol)) {
+              const update = await marketDataService.fetchMarketData(symbol);
+              console.log('ss', update);
+
+              if (update)
+                clients.forEach((client) => {
+                  if (client.readyState === WebSocket.OPEN) {
+                    client.send(
+                      JSON.stringify({
+                        type: 'market-update',
+                        data: [update],
+                      }),
+                    );
+                  }
+                });
+            }
           }
         } catch (error) {
           console.error('WebSocket message processing error:', error);
