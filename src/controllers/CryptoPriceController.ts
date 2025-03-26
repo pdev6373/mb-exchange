@@ -245,6 +245,7 @@ export async function initWebSocketServer(server: Server) {
   const wss = new WebSocket.Server({ server });
   const assets = await AssetModel.find();
   const symbols = assets?.map((asset) => `${asset.symbol.toUpperCase()}-USD`);
+  console.log('symbols', symbols);
   const clients = new Set<WebSocket>();
 
   const marketDataService = MarketDataService.getInstance();
@@ -315,7 +316,7 @@ export async function initWebSocketServer(server: Server) {
         try {
           const message = JSON.parse(data.toString());
           if (message.type === 'ticker') {
-            console.log('asdf', message.product);
+            console.log('message product', message.product);
             const symbol = message.product_id;
             const update = await marketDataService.fetchMarketData(symbol);
 
