@@ -47,7 +47,84 @@ export async function initWebSocketServer(server: Server) {
   let reconnectAttempts = 0;
   let reconnectTimer: NodeJS.Timeout | null = null;
 
-  const connectToCoinbaseWebSocket = () => {
+  // New function to fetch initial market data
+  const fetchInitialMarketData = async () => {
+    try {
+      const initialUpdates: MarketUpdate[] = [];
+
+      for (const symbol of symbols) {
+        try {
+          // Fetch ticker data
+          const tickerResponse = await axios.get(
+            `https://api.exchange.coinbase.com/products/${symbol}/ticker`,
+          );
+          const priceData = tickerResponse.data;
+
+          // Fetch 24h stats
+          const statsResponse = await axios.get(
+            `https://api.exchange.coinbase.com/products/${symbol}/stats`,
+          );
+          const statsData = statsResponse.data;
+
+          // Fetch historical chart data
+          const cacheKey = `${symbol}-24h`;
+          const now = Date.now();
+          const chartData = await fetchHistoricalDataFromCoinbase(
+            symbol,
+            '24h',
+          );
+
+          const price = parseFloat(priceData.price);
+          const open24h = parseFloat(statsData.open);
+          const volume24h = parseFloat(statsData.volume);
+
+          const change24h = price - open24h;
+          const changePercent24h = (
+            Math.round((change24h / open24h) * 100 * 100) / 100
+          ).toFixed(2);
+
+          const update: MarketUpdate = {
+            symbol,
+            price,
+            change24h,
+            changePercent24h: parseFloat(changePercent24h),
+            volume24h,
+            chartData,
+          };
+
+          initialUpdates.push(update);
+          latestUpdates.set(symbol, update);
+
+          // Cache the historical data
+          historyCache.set(cacheKey, {
+            period: '24h',
+            data: chartData,
+            lastFetched: now,
+          });
+        } catch (symbolError) {
+          console.error(`Error fetching data for ${symbol}:`, symbolError);
+        }
+      }
+
+      // Broadcast initial updates to all connected clients
+      clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN)
+          client.send(
+            JSON.stringify({
+              type: 'market-update',
+              data: initialUpdates,
+            }),
+          );
+      });
+    } catch (error) {
+      console.error('Error fetching initial market data:', error);
+    }
+  };
+
+  const connectToCoinbaseWebSocket = async () => {
+    // Fetch initial market data before establishing WebSocket connection
+    await fetchInitialMarketData();
+
     // Clear any existing reconnection timer
     if (reconnectTimer) {
       clearTimeout(reconnectTimer);
@@ -182,8 +259,8 @@ export async function initWebSocketServer(server: Server) {
     }, delay);
   };
 
-  // Initial connection
-  connectToCoinbaseWebSocket();
+  // Initial connection with initial data fetch
+  await connectToCoinbaseWebSocket();
 
   wss.on('connection', (ws) => {
     console.log('Client connected to WebSocket server');
@@ -199,6 +276,8 @@ export async function initWebSocketServer(server: Server) {
       );
     }
 
+    // Rest of the code remains the same as in the previous implementation
+    // (message handling, disconnect handling, etc.)
     ws.on('message', async (messageData) => {
       try {
         const message = JSON.parse(messageData.toString());
@@ -303,6 +382,7 @@ export async function initWebSocketServer(server: Server) {
   });
 }
 
+// The fetchHistoricalDataFromCoinbase function remains the same as in the previous implementation
 async function fetchHistoricalDataFromCoinbase(
   symbol: string,
   period: string = '24h',
