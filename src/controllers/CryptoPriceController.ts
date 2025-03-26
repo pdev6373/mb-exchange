@@ -109,31 +109,54 @@ class MarketDataService {
     }
 
     try {
-      const [price, statsData, chartData] = await Promise.all([
-        this.fetchLatestPrice(symbol),
-        this.rateLimitedFetch(() =>
-          axios.get(
-            `https://api.exchange.coinbase.com/products/${symbol}/stats`,
-          ),
-        ),
-        this.fetchHistoricalData(symbol, '24h'),
+      // Perform requests with more robust error handling and fallback
+      const priceResult = await this.fetchLatestPrice(symbol);
+      const statsPromise = this.rateLimitedFetch(() =>
+        axios.get(`https://api.exchange.coinbase.com/products/${symbol}/stats`),
+      );
+      const chartDataPromise = this.fetchHistoricalData(symbol, '24h');
+
+      const [price, statsResponse, chartData] = await Promise.all([
+        priceResult,
+        statsPromise,
+        chartDataPromise,
       ]);
 
-      if (!price || !statsData?.data) return null;
+      // If price fetch fails completely
+      if (price === null) {
+        // If we have a cached update, return it
+        if (cachedData?.update) {
+          return {
+            symbol: cachedData.update.symbol,
+            price: cachedData.update.price,
+            change24h: cachedData.update.change24h,
+            changePercent24h: cachedData.update.changePercent24h,
+            volume24h: cachedData.update.volume24h,
+            chartData: cachedData.update.chartData,
+          };
+        }
 
-      const open24h = parseFloat(statsData.data.open);
-      const volume24h = parseFloat(statsData.data.volume);
+        // Completely fallback scenario
+        return null;
+      }
+
+      // Provide sensible defaults for 24h change calculation
+      const open24h = statsResponse?.data?.open
+        ? parseFloat(statsResponse.data.open)
+        : cachedData?.update?.price || price;
+      const volume24h = statsResponse?.data?.volume
+        ? parseFloat(statsResponse.data.volume)
+        : 0;
 
       const change24h = price - open24h;
-      const changePercent24h = (
-        Math.round((change24h / open24h) * 100 * 100) / 100
-      ).toFixed(2);
+      const changePercent24h =
+        open24h !== 0 ? Number(((change24h / open24h) * 100).toFixed(2)) : 0;
 
       const update: MarketUpdate = {
         symbol,
         price,
         change24h,
-        changePercent24h: parseFloat(changePercent24h),
+        changePercent24h,
         volume24h,
         chartData,
       };
@@ -148,7 +171,21 @@ class MarketDataService {
       return update;
     } catch (error) {
       console.error(`Error fetching market data for ${symbol}:`, error);
-      return cachedData?.update || null;
+
+      // If we have a cached update, return it
+      if (cachedData?.update) {
+        return {
+          symbol: cachedData.update.symbol,
+          price: cachedData.update.price,
+          change24h: cachedData.update.change24h,
+          changePercent24h: cachedData.update.changePercent24h,
+          volume24h: cachedData.update.volume24h,
+          chartData: cachedData.update.chartData,
+        };
+      }
+
+      // Completely fallback scenario
+      return null;
     }
   }
 
@@ -182,6 +219,11 @@ class MarketDataService {
           },
         ),
       );
+
+      // Handle empty response
+      if (!response.data || response.data.length === 0) {
+        return cachedHistory?.data || [];
+      }
 
       const chartData = response.data
         .map((candle: number[]) => ({
@@ -239,22 +281,33 @@ export async function initWebSocketServer(server: Server) {
 
   const marketDataService = MarketDataService.getInstance();
 
-  // Initial data fetch
+  // Initial data fetch with improved error handling
   const fetchInitialMarketData = async () => {
     const initialUpdates: MarketUpdate[] = [];
 
-    // Use Promise.allSettled to handle partial failures
+    // Use Promise.allSettled to handle partial failures with more granular control
     const results = await Promise.allSettled(
-      symbols.map((symbol) => marketDataService.fetchMarketData(symbol)),
+      symbols.map(async (symbol) => {
+        // Implement a timeout to prevent hanging on slow requests
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second timeout
+
+          const marketData = await marketDataService.fetchMarketData(symbol);
+
+          clearTimeout(timeoutId);
+          return marketData;
+        } catch (error) {
+          console.error(`Initial data fetch failed for ${symbol}:`, error);
+          return null;
+        }
+      }),
     );
 
-    // Filter out successful results
+    // Filter out successful results, handling null and undefined
     const validUpdates = results
       .filter(
-        (result) =>
-          result.status === 'fulfilled' &&
-          (result as PromiseFulfilledResult<MarketUpdate | null>).value !==
-            null,
+        (result) => result.status === 'fulfilled' && result.value !== null,
       )
       .map((result) => (result as PromiseFulfilledResult<MarketUpdate>).value);
 
@@ -425,3 +478,5 @@ export async function initWebSocketServer(server: Server) {
     process.exit(0);
   });
 }
+
+export default MarketDataService;
