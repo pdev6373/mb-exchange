@@ -23,7 +23,6 @@ interface CandleData {
   volume: number;
 }
 
-// Centralized market data management
 class MarketDataService {
   private static instance: MarketDataService;
   private priceCache = new Map<
@@ -43,35 +42,27 @@ class MarketDataService {
     }
   >();
 
-  private PRICE_CACHE_DURATION = 5000; // 5 seconds
-  private HISTORY_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private PRICE_CACHE_DURATION = 5000;
+  private HISTORY_CACHE_DURATION = 5 * 60 * 1000;
   private rateLimitedFetch: (fn: () => Promise<any>) => Promise<any>;
 
   private constructor() {
-    // Create a rate limiter to prevent overwhelming Coinbase API
-    const limit = pLimit(3); // Max 3 concurrent requests
+    const limit = pLimit(3);
     this.rateLimitedFetch = (fn) => limit(() => fn());
   }
 
   public static getInstance(): MarketDataService {
-    if (!MarketDataService.instance) {
+    if (!MarketDataService.instance)
       MarketDataService.instance = new MarketDataService();
-    }
     return MarketDataService.instance;
   }
 
-  // Fetch latest price with intelligent caching
   public async fetchLatestPrice(symbol: string): Promise<number | null> {
     const now = Date.now();
     const cachedPrice = this.priceCache.get(symbol);
 
-    // Return cached price if recent
-    if (
-      cachedPrice &&
-      now - cachedPrice.timestamp < this.PRICE_CACHE_DURATION
-    ) {
+    if (cachedPrice && now - cachedPrice.timestamp < this.PRICE_CACHE_DURATION)
       return cachedPrice.price;
-    }
 
     try {
       const price = await this.rateLimitedFetch(async () => {
@@ -81,7 +72,6 @@ class MarketDataService {
         return parseFloat(response.data.price);
       });
 
-      // Update cache
       this.priceCache.set(symbol, {
         price,
         timestamp: now,
@@ -95,21 +85,17 @@ class MarketDataService {
     }
   }
 
-  // Comprehensive market data fetch with robust error handling
   public async fetchMarketData(symbol: string): Promise<MarketUpdate | null> {
     const now = Date.now();
     const cachedData = this.priceCache.get(symbol);
 
-    // If we have a recent full market update, return it
     if (
       cachedData?.update &&
       now - cachedData.timestamp < this.PRICE_CACHE_DURATION
-    ) {
+    )
       return cachedData.update;
-    }
 
     try {
-      // Perform requests with more robust error handling and fallback
       const priceResult = await this.fetchLatestPrice(symbol);
       const statsPromise = this.rateLimitedFetch(() =>
         axios.get(`https://api.exchange.coinbase.com/products/${symbol}/stats`),
@@ -122,10 +108,8 @@ class MarketDataService {
         chartDataPromise,
       ]);
 
-      // If price fetch fails completely
       if (price === null) {
-        // If we have a cached update, return it
-        if (cachedData?.update) {
+        if (cachedData?.update)
           return {
             symbol: cachedData.update.symbol,
             price: cachedData.update.price,
@@ -134,13 +118,9 @@ class MarketDataService {
             volume24h: cachedData.update.volume24h,
             chartData: cachedData.update.chartData,
           };
-        }
-
-        // Completely fallback scenario
         return null;
       }
 
-      // Provide sensible defaults for 24h change calculation
       const open24h = statsResponse?.data?.open
         ? parseFloat(statsResponse.data.open)
         : cachedData?.update?.price || price;
@@ -161,7 +141,6 @@ class MarketDataService {
         chartData,
       };
 
-      // Cache the full update
       this.priceCache.set(symbol, {
         price,
         timestamp: now,
@@ -172,8 +151,7 @@ class MarketDataService {
     } catch (error) {
       console.error(`Error fetching market data for ${symbol}:`, error);
 
-      // If we have a cached update, return it
-      if (cachedData?.update) {
+      if (cachedData?.update)
         return {
           symbol: cachedData.update.symbol,
           price: cachedData.update.price,
@@ -182,14 +160,10 @@ class MarketDataService {
           volume24h: cachedData.update.volume24h,
           chartData: cachedData.update.chartData,
         };
-      }
-
-      // Completely fallback scenario
       return null;
     }
   }
 
-  // Intelligent historical data fetching with extended caching
   public async fetchHistoricalData(
     symbol: string,
     period: string = '24h',
@@ -198,13 +172,11 @@ class MarketDataService {
     const cacheKey = `${symbol}-${period}`;
     const cachedHistory = this.historyCache.get(cacheKey);
 
-    // Return cached data if recent
     if (
       cachedHistory &&
       now - cachedHistory.lastFetched < this.HISTORY_CACHE_DURATION
-    ) {
+    )
       return cachedHistory.data;
-    }
 
     try {
       const { granularity, timeRange } = this.getHistoricalParams(period);
@@ -220,10 +192,8 @@ class MarketDataService {
         ),
       );
 
-      // Handle empty response
-      if (!response.data || response.data.length === 0) {
+      if (!response.data || response.data.length === 0)
         return cachedHistory?.data || [];
-      }
 
       const chartData = response.data
         .map((candle: number[]) => ({
@@ -236,7 +206,6 @@ class MarketDataService {
         }))
         .reverse();
 
-      // Cache the historical data
       this.historyCache.set(cacheKey, {
         period,
         data: chartData,
@@ -250,7 +219,6 @@ class MarketDataService {
     }
   }
 
-  // Helper method to determine historical data parameters
   private getHistoricalParams(period: string): {
     granularity: number;
     timeRange: number;
@@ -281,18 +249,14 @@ export async function initWebSocketServer(server: Server) {
 
   const marketDataService = MarketDataService.getInstance();
 
-  // Initial data fetch with improved error handling
   const fetchInitialMarketData = async () => {
     const initialUpdates: MarketUpdate[] = [];
 
-    // Use Promise.allSettled to handle partial failures with more granular control
     const results = await Promise.allSettled(
       symbols.map(async (symbol) => {
-        // Implement a timeout to prevent hanging on slow requests
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second timeout
-
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
           const marketData = await marketDataService.fetchMarketData(symbol);
 
           clearTimeout(timeoutId);
@@ -304,7 +268,6 @@ export async function initWebSocketServer(server: Server) {
       }),
     );
 
-    // Filter out successful results, handling null and undefined
     const validUpdates = results
       .filter(
         (result) => result.status === 'fulfilled' && result.value !== null,
@@ -314,7 +277,6 @@ export async function initWebSocketServer(server: Server) {
     return validUpdates;
   };
 
-  // WebSocket connection handler
   const connectToCoinbaseWebSocket = async () => {
     let coinbaseWs: WebSocket | null = null;
     let reconnectAttempts = 0;
@@ -326,29 +288,20 @@ export async function initWebSocketServer(server: Server) {
         return;
       }
 
-      // Exponential backoff
       const delay = Math.min(30000, 1000 * Math.pow(2, reconnectAttempts));
-
       reconnectAttempts++;
       console.log(`Reconnecting in ${delay}ms (Attempt ${reconnectAttempts})`);
-
       setTimeout(establishConnection, delay);
     };
 
     const establishConnection = () => {
-      // Close existing connection
-      if (coinbaseWs) {
-        coinbaseWs.close();
-      }
-
-      // Create new WebSocket
+      if (coinbaseWs) coinbaseWs.close();
       coinbaseWs = new WebSocket('wss://ws-feed.exchange.coinbase.com');
 
       coinbaseWs.on('open', () => {
         console.log('Connected to Coinbase WebSocket');
         reconnectAttempts = 0;
 
-        // Subscribe to ticker channels
         coinbaseWs?.send(
           JSON.stringify({
             type: 'subscribe',
@@ -361,15 +314,12 @@ export async function initWebSocketServer(server: Server) {
       coinbaseWs.on('message', async (data) => {
         try {
           const message = JSON.parse(data.toString());
-
           if (message.type === 'ticker') {
+            console.log('asdf', message.product);
             const symbol = message.product_id;
-
-            // Update market data via service
             const update = await marketDataService.fetchMarketData(symbol);
 
-            if (update) {
-              // Broadcast to all clients
+            if (update)
               clients.forEach((client) => {
                 if (client.readyState === WebSocket.OPEN) {
                   client.send(
@@ -380,7 +330,6 @@ export async function initWebSocketServer(server: Server) {
                   );
                 }
               });
-            }
           }
         } catch (error) {
           console.error('WebSocket message processing error:', error);
@@ -398,48 +347,37 @@ export async function initWebSocketServer(server: Server) {
       });
     };
 
-    // Initial connection and data fetch
     const initialUpdates = await fetchInitialMarketData();
-
-    // Broadcast initial updates to any existing clients
     clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
+      if (client.readyState === WebSocket.OPEN)
         client.send(
           JSON.stringify({
             type: 'market-update',
             data: initialUpdates,
           }),
         );
-      }
     });
 
-    // Establish WebSocket connection
     establishConnection();
   };
 
-  // WebSocket server connection handler
   wss.on('connection', async (ws) => {
     console.log('Client connected');
     clients.add(ws);
 
     try {
-      // Fetch and send latest market data on connection
       const marketUpdates = await fetchInitialMarketData();
-
-      if (marketUpdates.length > 0) {
+      if (marketUpdates.length > 0)
         ws.send(
           JSON.stringify({
             type: 'market-update',
             data: marketUpdates,
           }),
         );
-      }
 
-      // Handle client-specific messages
       ws.on('message', async (messageData) => {
         try {
           const message = JSON.parse(messageData.toString());
-
           if (message.type === 'timeframe-change') {
             const { symbol, period } = message;
             const chartData = await marketDataService.fetchHistoricalData(
@@ -468,10 +406,7 @@ export async function initWebSocketServer(server: Server) {
     }
   });
 
-  // Initiate WebSocket connection
   await connectToCoinbaseWebSocket();
-
-  // Graceful shutdown
   process.on('SIGINT', () => {
     wss.close();
     console.log('WebSocket server closed');
