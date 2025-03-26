@@ -43,9 +43,21 @@ const server = createServer(app);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const allowedOrigins = [
+  'https://mbexchangehub.com',
+  'https://admin-access-portal.mbxchangehub.com',
+  'https://mbexchange-api.mbexchangehub.com',
+];
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
+      if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+      else callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     optionsSuccessStatus: 200,
   }),
