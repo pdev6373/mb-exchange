@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 import { Server } from 'http';
 import axios from 'axios';
 import { AssetModel } from '../models/Asset';
-import pLimit from 'p-limit';
+import Bottleneck from 'bottleneck';
 
 interface MarketUpdate {
   symbol: string;
@@ -47,8 +47,10 @@ class MarketDataService {
   private rateLimitedFetch: (fn: () => Promise<any>) => Promise<any>;
 
   private constructor() {
-    const limit = pLimit(3);
-    this.rateLimitedFetch = (fn) => limit(() => fn());
+    const limiter = new Bottleneck({
+      maxConcurrent: 3, // Limit to 3 concurrent tasks
+    });
+    this.rateLimitedFetch = (fn) => limiter.schedule(() => fn());
   }
 
   public static getInstance(): MarketDataService {

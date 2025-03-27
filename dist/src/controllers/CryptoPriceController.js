@@ -7,15 +7,17 @@ exports.initWebSocketServer = initWebSocketServer;
 const ws_1 = __importDefault(require("ws"));
 const axios_1 = __importDefault(require("axios"));
 const Asset_1 = require("../models/Asset");
-const p_limit_1 = __importDefault(require("p-limit"));
+const bottleneck_1 = __importDefault(require("bottleneck"));
 class MarketDataService {
     constructor() {
         this.priceCache = new Map();
         this.historyCache = new Map();
         this.PRICE_CACHE_DURATION = 5000;
         this.HISTORY_CACHE_DURATION = 5 * 60 * 1000;
-        const limit = (0, p_limit_1.default)(3);
-        this.rateLimitedFetch = (fn) => limit(() => fn());
+        const limiter = new bottleneck_1.default({
+            maxConcurrent: 3, // Limit to 3 concurrent tasks
+        });
+        this.rateLimitedFetch = (fn) => limiter.schedule(() => fn());
     }
     static getInstance() {
         if (!MarketDataService.instance)
