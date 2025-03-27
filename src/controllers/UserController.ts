@@ -268,6 +268,18 @@ export class UserController {
     );
   }
 
+  @Patch('/push-token/:pushToken')
+  public async pushToken(
+    @Request() req: ExpressRequest,
+    @Path() pushToken: string,
+  ) {
+    await UserModel.findByIdAndUpdate(req?.user?._id, {
+      pushToken,
+    });
+
+    return successResponse('Token updated successfully');
+  }
+
   @Get('/all-banks/:country')
   public async getAllBanks(@Path() country: string) {
     let banks = await BanksModel.findOne();

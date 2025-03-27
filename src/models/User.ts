@@ -96,6 +96,9 @@ export class User {
   @prop()
   public otp?: string;
 
+  @prop()
+  public pushToken?: string;
+
   @prop({ default: 0 })
   public points?: number;
 
