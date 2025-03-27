@@ -94,6 +94,7 @@ const models: TsoaRoute.Models = {
             "registrationStatus": {"ref":"RegistrationStatus"},
             "refreshToken": {"dataType":"string"},
             "otp": {"dataType":"string"},
+            "pushToken": {"dataType":"string"},
             "points": {"dataType":"double"},
             "successfulTransactions": {"dataType":"double"},
             "failedTransactions": {"dataType":"double"},
@@ -197,6 +198,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "id": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
+            "symbol": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -225,7 +227,7 @@ const models: TsoaRoute.Models = {
             "address": {"dataType":"string","required":true},
             "quantity": {"dataType":"double","required":true},
             "rate": {"dataType":"double","required":true},
-            "amount": {"dataType":"double","required":true},
+            "amount": {"dataType":"double"},
             "proof": {"dataType":"string","required":true},
             "dateApproved": {"dataType":"datetime"},
             "status": {"ref":"TransactionStatusType","required":true},
@@ -678,6 +680,38 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
 
               await templateService.apiHandler({
                 methodName: 'enableNotifications',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsUserController_pushToken: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                pushToken: {"in":"path","name":"pushToken","required":true,"dataType":"string"},
+        };
+        app.patch('/user/push-token/:pushToken',
+            authenticateMiddleware([{"BearerAuth":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(UserController)),
+            ...(fetchMiddlewares<RequestHandler>(UserController.prototype.pushToken)),
+
+            async function UserController_pushToken(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsUserController_pushToken, request, response });
+
+                const controller = new UserController();
+
+              await templateService.apiHandler({
+                methodName: 'pushToken',
                 controller,
                 response,
                 next,
@@ -2199,8 +2233,9 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
         const argsAdminController_validateTransaction: Record<string, TsoaRoute.ParameterSchema> = {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
                 status: {"in":"path","name":"status","required":true,"ref":"TransactionStatusType"},
+                amount: {"default":0,"in":"path","name":"amount","required":true,"dataType":"double"},
         };
-        app.patch('/admin/transactions/:id/:status',
+        app.patch('/admin/transactions/:id/:status/:amount',
             authenticateMiddleware([{"BearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AdminController)),
             ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.validateTransaction)),

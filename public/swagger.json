@@ -148,6 +148,9 @@
 					"otp": {
 						"type": "string"
 					},
+					"pushToken": {
+						"type": "string"
+					},
 					"points": {
 						"type": "number",
 						"format": "double"
@@ -388,11 +391,15 @@
 					},
 					"name": {
 						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
 					}
 				},
 				"required": [
 					"id",
-					"name"
+					"name",
+					"symbol"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -470,7 +477,6 @@
 					"address",
 					"quantity",
 					"rate",
-					"amount",
 					"proof",
 					"status"
 				],
@@ -1303,6 +1309,55 @@
 				}
 			}
 		},
+		"/user/push-token/{pushToken}": {
+			"patch": {
+				"operationId": "PushToken",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {},
+										"message": {
+											"type": "string"
+										},
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"data",
+										"message",
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "pushToken",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/user/all-banks/{country}": {
 			"get": {
 				"operationId": "GetAllBanks",
@@ -1408,46 +1463,10 @@
 								"schema": {
 									"properties": {
 										"data": {
-											"properties": {
-												"pagination": {
-													"properties": {
-														"totalPages": {
-															"type": "number",
-															"format": "double"
-														},
-														"limit": {
-															"type": "number",
-															"format": "double"
-														},
-														"page": {
-															"type": "number",
-															"format": "double"
-														},
-														"total": {
-															"type": "number",
-															"format": "double"
-														}
-													},
-													"required": [
-														"totalPages",
-														"limit",
-														"page",
-														"total"
-													],
-													"type": "object"
-												},
-												"transactions": {
-													"items": {
-														"$ref": "#/components/schemas/Transaction"
-													},
-													"type": "array"
-												}
+											"items": {
+												"$ref": "#/components/schemas/Transaction"
 											},
-											"required": [
-												"pagination",
-												"transactions"
-											],
-											"type": "object"
+											"type": "array"
 										},
 										"message": {
 											"type": "string"
@@ -1539,7 +1558,9 @@
 							"application/json": {
 								"schema": {
 									"properties": {
-										"data": {},
+										"data": {
+											"$ref": "#/components/schemas/User"
+										},
 										"message": {
 											"type": "string"
 										},
@@ -4011,7 +4032,7 @@
 				]
 			}
 		},
-		"/admin/transactions/{id}/{status}": {
+		"/admin/transactions/{id}/{status}/{amount}": {
 			"patch": {
 				"operationId": "ValidateTransaction",
 				"responses": {
@@ -4065,6 +4086,16 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/TransactionStatusType"
+						}
+					},
+					{
+						"in": "path",
+						"name": "amount",
+						"required": false,
+						"schema": {
+							"default": 0,
+							"format": "double",
+							"type": "number"
 						}
 					}
 				]
