@@ -1,5 +1,5 @@
 import { Expo } from 'expo-server-sdk';
-import { UserModel } from 'models/User';
+import { UserModel } from '../models/User';
 
 const expo = new Expo();
 
