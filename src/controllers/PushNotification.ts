@@ -26,9 +26,9 @@ export class PushNotificationService {
       const response = await expo.sendPushNotificationsAsync([
         {
           to: user.pushToken,
-          sound: 'default',
           title,
           body,
+          sound: 'default',
           data,
         },
       ]);
