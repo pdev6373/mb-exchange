@@ -70,7 +70,7 @@ let AdminAuthController = class AdminAuthController {
             type: 'access',
             role: admin.role,
         });
-        return (0, responseWrapper_1.successResponse)('Access token generated successfully', token);
+        return (0, responseWrapper_1.successResponse)('Token generated successfully', token);
     }
     async acceptInvite(data) {
         const { token, password, action } = data;

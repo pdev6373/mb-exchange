@@ -40,7 +40,7 @@ let AdminController = class AdminController {
     async addAdmin(data, req) {
         const { email, name, role } = data;
         if (req.user?.email == email)
-            throw new customErrors_1.UnauthorizedError("You can't add yourself as an admin");
+            throw new customErrors_1.UnauthorizedError('You are already an admin');
         const existingActiveAdmin = await Admin_1.AdminModel.findOne({
             email,
             isActive: true,
@@ -240,7 +240,7 @@ let AdminController = class AdminController {
         if (transaction.status == status)
             return (0, responseWrapper_1.successResponse)('Transaction updated successfully', transaction);
         if (status == 'successful' && amount <= 0)
-            throw new customErrors_1.BadRequestError('Amount transferred in dollars must be provided');
+            throw new customErrors_1.BadRequestError('Amount transferred in users currency must be provided');
         const previousStatus = transaction.status;
         transaction.status = status;
         if (status == 'pending')

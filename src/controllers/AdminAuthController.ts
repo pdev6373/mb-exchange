@@ -82,7 +82,7 @@ export class AdminAuthController {
       type: 'access',
       role: admin.role,
     });
-    return successResponse('Access token generated successfully', token);
+    return successResponse('Token generated successfully', token);
   }
 
   @Post('/accept-invite')

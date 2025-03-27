@@ -35,7 +35,7 @@ let SocialPlatformController = class SocialPlatformController {
         const { icon, name, url } = data;
         const socialPlatformExist = await SocialPlatform_1.SocialPlatformModel.findOne({ name });
         if (socialPlatformExist)
-            throw new customErrors_1.BadRequestError('A social platform with this name already exists');
+            throw new customErrors_1.BadRequestError('Social platform already exists');
         await SocialPlatform_1.SocialPlatformModel.create({
             icon,
             name,
@@ -54,7 +54,7 @@ let SocialPlatformController = class SocialPlatformController {
                 _id: { $ne: id },
             });
             if (socialPlatformExist)
-                throw new customErrors_1.BadRequestError('A social platform with name already exists');
+                throw new customErrors_1.BadRequestError('Social platform already exists');
             socialPlatform.name = name;
         }
         if (url)

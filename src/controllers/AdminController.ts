@@ -66,7 +66,7 @@ export class AdminController {
     const { email, name, role } = data;
 
     if (req.user?.email == email)
-      throw new UnauthorizedError("You can't add yourself as an admin");
+      throw new UnauthorizedError('You are already an admin');
 
     const existingActiveAdmin = await AdminModel.findOne({
       email,
@@ -350,7 +350,7 @@ export class AdminController {
 
     if (status == 'successful' && amount <= 0)
       throw new BadRequestError(
-        'Amount transferred in dollars must be provided',
+        'Amount transferred in users currency must be provided',
       );
 
     const previousStatus = transaction.status;

@@ -155,25 +155,19 @@ export class UserController {
         (!currentCountryCode ||
           !isValidPhoneNumber(phoneNumber, currentCountryCode))
       )
-        throw new BadRequestError(
-          'Phone number does not match the current country code',
-        );
+        throw new BadRequestError('Phone number and country mismatch');
 
       if (country?.name) {
         const newCountryCode = country.code;
 
         if (!isValidPhoneNumber(phoneNumber, newCountryCode))
-          throw new BadRequestError(
-            'Phone number does not match the selected country code',
-          );
+          throw new BadRequestError('Phone number and country mismatch');
 
         if (
           newCountryCode !== currentCountryCode &&
           phoneNumber == user?.phoneNumber
         )
-          throw new BadRequestError(
-            'Changing the country requires updating the phone number',
-          );
+          throw new BadRequestError('Phone number and country mismatch');
 
         user.country = {
           code: newCountryCode,
@@ -187,9 +181,7 @@ export class UserController {
     }
 
     if (country && !phoneNumber)
-      throw new BadRequestError(
-        'Changing the country requires updating the phone number',
-      );
+      throw new BadRequestError('Phone number and country mismatch');
 
     if (userName && userName !== user.userName) {
       const userNameExists = await UserModel.findOne({
@@ -442,7 +434,7 @@ export class UserController {
     };
 
     if (!user.points || user?.points < 5000)
-      throw new NotFoundError('You need a minimum of 5000 points');
+      throw new NotFoundError('Minimum of 5000 points needed');
     if (user.pendingRewards)
       throw new NotFoundError('You have a pending reward');
     const key = await this.getUniqueRewardId();
@@ -537,9 +529,7 @@ export class UserController {
 
     if (!user.banks) user.banks = [];
     if (user.banks.length >= 5)
-      throw new BadRequestError(
-        'You can only have a maximum of 5 bank accounts.',
-      );
+      throw new BadRequestError('Maximum of 5 accounts allowed');
 
     user.banks.push({
       accountName,

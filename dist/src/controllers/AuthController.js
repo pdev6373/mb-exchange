@@ -198,7 +198,7 @@ let AuthController = class AuthController {
         if (!(0, helpers_1.isValidCountryCode)(country.code))
             throw new customErrors_1.BadRequestError('Invalid country code');
         if (!(0, helpers_1.isValidPhoneNumber)(phoneNumber, country.code))
-            throw new customErrors_1.BadRequestError('Invalid phone number for the selected country');
+            throw new customErrors_1.BadRequestError('Phone number and country mismatch');
         const user = await User_1.UserModel.findOne({ email });
         if (!user)
             throw new customErrors_1.NotFoundError('User not found');
@@ -218,7 +218,7 @@ let AuthController = class AuthController {
         user.registrationStatus = auth_1.RegistrationStatus.COMPLETE;
         user.gender = gender;
         await user.save();
-        return (0, responseWrapper_1.successResponse)('Additional profile completed successfully');
+        return (0, responseWrapper_1.successResponse)('Profile completed successfully');
     }
     async setupPin(data) {
         const { email, pin } = data;
@@ -281,7 +281,7 @@ let AuthController = class AuthController {
         if (!user)
             throw new customErrors_1.NotFoundError('User not found');
         if (user.registrationStatus !== auth_1.RegistrationStatus.ACTIVE)
-            throw new customErrors_1.UnauthorizedError('Account creation not completed');
+            throw new customErrors_1.UnauthorizedError('Incomplete account creation');
         const isMatch = await bcryptjs_1.default.compare(password, user.password);
         if (!isMatch)
             throw new customErrors_1.BadRequestError('Invalid email or password');
@@ -365,7 +365,7 @@ let AuthController = class AuthController {
             email: user.email,
             type: 'access',
         });
-        return (0, responseWrapper_1.successResponse)('Access token generated successfully', token);
+        return (0, responseWrapper_1.successResponse)('Token generated successfully', token);
     }
     async resetPassword(data) {
         const { email, otp, password } = data;

@@ -110,14 +110,14 @@ let UserController = class UserController {
             if (!country &&
                 (!currentCountryCode ||
                     !(0, helpers_1.isValidPhoneNumber)(phoneNumber, currentCountryCode)))
-                throw new customErrors_1.BadRequestError('Phone number does not match the current country code');
+                throw new customErrors_1.BadRequestError('Phone number and country mismatch');
             if (country?.name) {
                 const newCountryCode = country.code;
                 if (!(0, helpers_1.isValidPhoneNumber)(phoneNumber, newCountryCode))
-                    throw new customErrors_1.BadRequestError('Phone number does not match the selected country code');
+                    throw new customErrors_1.BadRequestError('Phone number and country mismatch');
                 if (newCountryCode !== currentCountryCode &&
                     phoneNumber == user?.phoneNumber)
-                    throw new customErrors_1.BadRequestError('Changing the country requires updating the phone number');
+                    throw new customErrors_1.BadRequestError('Phone number and country mismatch');
                 user.country = {
                     code: newCountryCode,
                     name: country.name,
@@ -128,7 +128,7 @@ let UserController = class UserController {
             user.phoneNumber = phoneNumber;
         }
         if (country && !phoneNumber)
-            throw new customErrors_1.BadRequestError('Changing the country requires updating the phone number');
+            throw new customErrors_1.BadRequestError('Phone number and country mismatch');
         if (userName && userName !== user.userName) {
             const userNameExists = await User_1.UserModel.findOne({
                 userName,
@@ -306,7 +306,7 @@ let UserController = class UserController {
     async payReward(req) {
         const user = req.user;
         if (!user.points || user?.points < 5000)
-            throw new customErrors_1.NotFoundError('You need a minimum of 5000 points');
+            throw new customErrors_1.NotFoundError('Minimum of 5000 points needed');
         if (user.pendingRewards)
             throw new customErrors_1.NotFoundError('You have a pending reward');
         const key = await this.getUniqueRewardId();
@@ -382,7 +382,7 @@ let UserController = class UserController {
         if (!user.banks)
             user.banks = [];
         if (user.banks.length >= 5)
-            throw new customErrors_1.BadRequestError('You can only have a maximum of 5 bank accounts.');
+            throw new customErrors_1.BadRequestError('Maximum of 5 accounts allowed');
         user.banks.push({
             accountName,
             accountNumber,

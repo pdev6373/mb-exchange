@@ -277,9 +277,7 @@ export class AuthController {
       throw new BadRequestError('Invalid country code');
 
     if (!isValidPhoneNumber(phoneNumber, country.code))
-      throw new BadRequestError(
-        'Invalid phone number for the selected country',
-      );
+      throw new BadRequestError('Phone number and country mismatch');
 
     const user = await UserModel.findOne({ email });
     if (!user) throw new NotFoundError('User not found');
@@ -302,7 +300,7 @@ export class AuthController {
 
     await user.save();
 
-    return successResponse('Additional profile completed successfully');
+    return successResponse('Profile completed successfully');
   }
 
   @Post('/setup-pin')
@@ -379,7 +377,7 @@ export class AuthController {
     const user = await UserModel.findOne({ email });
     if (!user) throw new NotFoundError('User not found');
     if (user.registrationStatus !== RegistrationStatus.ACTIVE)
-      throw new UnauthorizedError('Account creation not completed');
+      throw new UnauthorizedError('Incomplete account creation');
 
     const isMatch = await bcrypt.compare(password, user.password!);
     if (!isMatch) throw new BadRequestError('Invalid email or password');
@@ -489,7 +487,7 @@ export class AuthController {
       email: user.email,
       type: 'access',
     });
-    return successResponse('Access token generated successfully', token);
+    return successResponse('Token generated successfully', token);
   }
 
   @Patch('/reset-password')
