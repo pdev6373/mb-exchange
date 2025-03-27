@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PushNotificationService = void 0;
 const expo_server_sdk_1 = require("expo-server-sdk");
-const User_1 = require("models/User");
+const User_1 = require("../models/User");
 const expo = new expo_server_sdk_1.Expo();
 class PushNotificationService {
     static async sendPushNotification(userId, title, body, data = {}) {
