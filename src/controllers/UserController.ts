@@ -368,7 +368,8 @@ export class UserController {
 
   @Get('/rewards')
   public async getRewards(@Request() req: ExpressRequest) {
-    const rewards = await RewardModel.find({ 'user.id': req?.user?._id });
+    const userId = new Types.ObjectId(req.user._id);
+    const rewards = await RewardModel.find({ 'user.id': userId });
     return successResponse('Rewards fetched successfully', rewards as Reward[]);
   }
 
