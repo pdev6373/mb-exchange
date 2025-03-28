@@ -23,7 +23,6 @@ export async function expressAuthentication(
   const authHeader = request.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer '))
     throw new ForbiddenError('Invalid token');
-
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET) as {

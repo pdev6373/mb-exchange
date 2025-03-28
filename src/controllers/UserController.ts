@@ -79,69 +79,9 @@ export class UserController {
       });
       return response.data.data?.filter((bank: any) => bank.active);
     } catch (error: any) {
-      console.error('Error fetching banks from Paystack:', error?.message);
       throw new NotFoundError('could not find bank');
     }
   };
-
-  @Get('/assets')
-  public async getAssets(@Request() req: ExpressRequest) {
-    const userCurrencyCode = (
-      req?.user as User
-    ).country?.currency?.toLowerCase();
-
-    const assets = await AssetModel.find()
-      .sort({ createdAt: -1 })
-      .lean()
-      .transform((documents) =>
-        documents.map((asset) => {
-          let displayRate = asset.rate;
-          let currencySymbol = '$';
-
-          if (userCurrencyCode === 'ngn') {
-            displayRate = asset.ngnRate;
-            currencySymbol = '₦';
-          } else if (userCurrencyCode === 'ghs' || userCurrencyCode === 'ghc') {
-            displayRate = asset.ghcRate;
-            currencySymbol = 'GH₵';
-          }
-
-          return {
-            ...asset,
-            rate: `${currencySymbol}${this.formatNumber(displayRate)}`,
-          };
-        }),
-      );
-    return successResponse('Assets fetched successfully', assets);
-  }
-
-  @Get('/:id')
-  public async getAsset(@Path() id: string, @Request() req: ExpressRequest) {
-    const userCurrencyCode = (
-      req?.user as User
-    ).country?.currency?.toLowerCase();
-
-    const asset = await AssetModel.findById(id).lean();
-
-    if (!asset) throw new NotFoundError('Asset not found');
-
-    let displayRate = asset.rate;
-    let currencySymbol = '$';
-
-    if (userCurrencyCode === 'ngn') {
-      displayRate = asset.ngnRate;
-      currencySymbol = '₦';
-    } else if (userCurrencyCode === 'ghs' || userCurrencyCode === 'ghc') {
-      displayRate = asset.ghcRate;
-      currencySymbol = 'GH₵';
-    }
-    const formattedAsset = {
-      ...asset,
-      rate: `${currencySymbol}${this.formatNumber(displayRate)}`,
-    };
-
-    return successResponse('Asset fetched successfully', formattedAsset);
-  }
 
   private async getUniqueTransactionId() {
     let transactionId: string = '';
@@ -327,6 +267,65 @@ export class UserController {
     );
   }
 
+  @Get('/assets')
+  public async getAssets(@Request() req: ExpressRequest) {
+    const userCurrencyCode = (
+      req?.user as User
+    ).country?.currency?.toLowerCase();
+
+    const assets = await AssetModel.find()
+      .sort({ createdAt: -1 })
+      .lean()
+      .transform((documents) =>
+        documents.map((asset) => {
+          let displayRate = asset.rate;
+          let currencySymbol = '$';
+
+          if (userCurrencyCode === 'ngn') {
+            displayRate = asset.ngnRate;
+            currencySymbol = '₦';
+          } else if (userCurrencyCode === 'ghs' || userCurrencyCode === 'ghc') {
+            displayRate = asset.ghcRate;
+            currencySymbol = 'GH₵';
+          }
+
+          return {
+            ...asset,
+            rate: `${currencySymbol}${this.formatNumber(displayRate)}`,
+          };
+        }),
+      );
+    return successResponse('Assets fetched successfully', assets);
+  }
+
+  @Get('/assets/:id')
+  public async getAsset(@Path() id: string, @Request() req: ExpressRequest) {
+    const userCurrencyCode = (
+      req?.user as User
+    ).country?.currency?.toLowerCase();
+
+    const asset = await AssetModel.findById(id).lean();
+
+    if (!asset) throw new NotFoundError('Asset not found');
+
+    let displayRate = asset.rate;
+    let currencySymbol = '$';
+
+    if (userCurrencyCode === 'ngn') {
+      displayRate = asset.ngnRate;
+      currencySymbol = '₦';
+    } else if (userCurrencyCode === 'ghs' || userCurrencyCode === 'ghc') {
+      displayRate = asset.ghcRate;
+      currencySymbol = 'GH₵';
+    }
+    const formattedAsset = {
+      ...asset,
+      rate: `${currencySymbol}${this.formatNumber(displayRate)}`,
+    };
+
+    return successResponse('Asset fetched successfully', formattedAsset);
+  }
+
   @Patch('/push-token/:pushToken')
   public async pushToken(
     @Request() req: ExpressRequest,
@@ -360,14 +359,13 @@ export class UserController {
         await banks.save();
       }
     }
-
     return successResponse('Banks fetched successfully', banks.data);
   }
 
   @Get('/rewards')
   public async getRewards(@Request() req: ExpressRequest) {
     const rewards = await RewardModel.find({
-      'user.id': req?.user?._id?.toString(),
+      'user.id': req?.user?._id,
     });
     return successResponse('Rewards fetched successfully', rewards as Reward[]);
   }
@@ -375,7 +373,7 @@ export class UserController {
   @Get('/transactions')
   public async getTransactions(@Request() req: ExpressRequest) {
     const transactions = await TransactionModel.find({
-      'user.id': req.user._id.toString(),
+      'user.id': req.user._id,
     })
       .sort({ createdAt: -1 })
       .lean();

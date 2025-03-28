@@ -297,58 +297,51 @@ export async function initWebSocketServer(server: Server) {
     };
 
     const establishConnection = () => {
-      if (coinbaseWs) coinbaseWs.close();
-      coinbaseWs = new WebSocket('wss://ws-feed.exchange.coinbase.com');
-
-      coinbaseWs.on('open', () => {
-        console.log('Connected to Coinbase WebSocket');
-        reconnectAttempts = 0;
-
-        coinbaseWs?.send(
-          JSON.stringify({
-            type: 'subscribe',
-            product_ids: symbols,
-            channels: ['ticker'],
-          }),
-        );
-      });
-
-      coinbaseWs.on('message', async (data) => {
-        try {
-          const message = JSON.parse(data.toString());
-          if (message.type === 'ticker') {
-            const symbol = message.product_id;
-
-            if (symbols.includes(symbol)) {
-              const update = await marketDataService.fetchMarketData(symbol);
-
-              if (update)
-                clients.forEach((client) => {
-                  if (client.readyState === WebSocket.OPEN) {
-                    client.send(
-                      JSON.stringify({
-                        type: 'market-update',
-                        data: [update],
-                      }),
-                    );
-                  }
-                });
-            }
-          }
-        } catch (error) {
-          console.error('WebSocket message processing error:', error);
-        }
-      });
-
-      coinbaseWs.on('error', (error) => {
-        console.error('WebSocket error:', error);
-        reconnect();
-      });
-
-      coinbaseWs.on('close', (code, reason) => {
-        console.log(`WebSocket closed. Code: ${code}, Reason: ${reason}`);
-        reconnect();
-      });
+      // if (coinbaseWs) coinbaseWs.close();
+      // coinbaseWs = new WebSocket('wss://ws-feed.exchange.coinbase.com');
+      // coinbaseWs.on('open', () => {
+      //   console.log('Connected to Coinbase WebSocket');
+      //   reconnectAttempts = 0;
+      //   coinbaseWs?.send(
+      //     JSON.stringify({
+      //       type: 'subscribe',
+      //       product_ids: symbols,
+      //       channels: ['ticker'],
+      //     }),
+      //   );
+      // });
+      // coinbaseWs.on('message', async (data) => {
+      //   try {
+      //     const message = JSON.parse(data.toString());
+      //     if (message.type === 'ticker') {
+      //       const symbol = message.product_id;
+      //       if (symbols.includes(symbol)) {
+      //         const update = await marketDataService.fetchMarketData(symbol);
+      //         if (update)
+      //           clients.forEach((client) => {
+      //             if (client.readyState === WebSocket.OPEN) {
+      //               client.send(
+      //                 JSON.stringify({
+      //                   type: 'market-update',
+      //                   data: [update],
+      //                 }),
+      //               );
+      //             }
+      //           });
+      //       }
+      //     }
+      //   } catch (error) {
+      //     console.error('WebSocket message processing error:', error);
+      //   }
+      // });
+      // coinbaseWs.on('error', (error) => {
+      //   console.error('WebSocket error:', error);
+      //   reconnect();
+      // });
+      // coinbaseWs.on('close', (code, reason) => {
+      //   console.log(`WebSocket closed. Code: ${code}, Reason: ${reason}`);
+      //   reconnect();
+      // });
     };
 
     const initialUpdates = await fetchInitialMarketData();

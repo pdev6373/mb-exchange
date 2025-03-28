@@ -7,13 +7,6 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"mongoose.FlattenMaps__platform-string--address-string__": {
-				"properties": {},
-				"type": "object"
-			},
-			"mongoose.Types.ObjectId": {
-				"type": "string"
-			},
 			"Referrer": {
 				"properties": {
 					"id": {
@@ -313,6 +306,13 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"mongoose.FlattenMaps__platform-string--address-string__": {
+				"properties": {},
+				"type": "object"
+			},
+			"mongoose.Types.ObjectId": {
+				"type": "string"
 			},
 			"RewardInitiator": {
 				"properties": {
@@ -1082,220 +1082,6 @@
 		}
 	},
 	"paths": {
-		"/user/assets": {
-			"get": {
-				"operationId": "GetAssets",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"data": {
-											"items": {
-												"properties": {
-													"__v": {
-														"type": "number",
-														"format": "double"
-													},
-													"_id": {
-														"$ref": "#/components/schemas/mongoose.Types.ObjectId"
-													},
-													"platformAddresses": {
-														"items": {
-															"$ref": "#/components/schemas/mongoose.FlattenMaps__platform-string--address-string__"
-														},
-														"type": "array"
-													},
-													"isActive": {
-														"type": "boolean"
-													},
-													"hasPlatforms": {
-														"type": "boolean"
-													},
-													"description": {
-														"type": "string"
-													},
-													"ghcRate": {
-														"type": "number",
-														"format": "double"
-													},
-													"ngnRate": {
-														"type": "number",
-														"format": "double"
-													},
-													"image": {
-														"type": "string"
-													},
-													"symbol": {
-														"type": "string"
-													},
-													"name": {
-														"type": "string"
-													},
-													"cryptoId": {
-														"type": "string"
-													},
-													"rate": {
-														"type": "string"
-													}
-												},
-												"required": [
-													"__v",
-													"_id",
-													"platformAddresses",
-													"hasPlatforms",
-													"ghcRate",
-													"ngnRate",
-													"symbol",
-													"name",
-													"cryptoId",
-													"rate"
-												],
-												"type": "object"
-											},
-											"type": "array"
-										},
-										"message": {
-											"type": "string"
-										},
-										"success": {
-											"type": "boolean"
-										}
-									},
-									"required": [
-										"data",
-										"message",
-										"success"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"User"
-				],
-				"security": [
-					{
-						"BearerAuth": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/user/{id}": {
-			"get": {
-				"operationId": "GetAsset",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"data": {
-											"properties": {
-												"__v": {
-													"type": "number",
-													"format": "double"
-												},
-												"_id": {
-													"$ref": "#/components/schemas/mongoose.Types.ObjectId"
-												},
-												"platformAddresses": {
-													"items": {
-														"$ref": "#/components/schemas/mongoose.FlattenMaps__platform-string--address-string__"
-													},
-													"type": "array"
-												},
-												"isActive": {
-													"type": "boolean"
-												},
-												"hasPlatforms": {
-													"type": "boolean"
-												},
-												"description": {
-													"type": "string"
-												},
-												"ghcRate": {
-													"type": "number",
-													"format": "double"
-												},
-												"ngnRate": {
-													"type": "number",
-													"format": "double"
-												},
-												"image": {
-													"type": "string"
-												},
-												"symbol": {
-													"type": "string"
-												},
-												"name": {
-													"type": "string"
-												},
-												"cryptoId": {
-													"type": "string"
-												},
-												"rate": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"__v",
-												"_id",
-												"platformAddresses",
-												"hasPlatforms",
-												"ghcRate",
-												"ngnRate",
-												"symbol",
-												"name",
-												"cryptoId",
-												"rate"
-											],
-											"type": "object"
-										},
-										"message": {
-											"type": "string"
-										},
-										"success": {
-											"type": "boolean"
-										}
-									},
-									"required": [
-										"data",
-										"message",
-										"success"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"User"
-				],
-				"security": [
-					{
-						"BearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
 		"/user": {
 			"get": {
 				"operationId": "GetUser",
@@ -1538,6 +1324,220 @@
 						}
 					}
 				}
+			}
+		},
+		"/user/assets": {
+			"get": {
+				"operationId": "GetAssets",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"properties": {
+													"__v": {
+														"type": "number",
+														"format": "double"
+													},
+													"_id": {
+														"$ref": "#/components/schemas/mongoose.Types.ObjectId"
+													},
+													"platformAddresses": {
+														"items": {
+															"$ref": "#/components/schemas/mongoose.FlattenMaps__platform-string--address-string__"
+														},
+														"type": "array"
+													},
+													"isActive": {
+														"type": "boolean"
+													},
+													"hasPlatforms": {
+														"type": "boolean"
+													},
+													"description": {
+														"type": "string"
+													},
+													"ghcRate": {
+														"type": "number",
+														"format": "double"
+													},
+													"ngnRate": {
+														"type": "number",
+														"format": "double"
+													},
+													"image": {
+														"type": "string"
+													},
+													"symbol": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"cryptoId": {
+														"type": "string"
+													},
+													"rate": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"__v",
+													"_id",
+													"platformAddresses",
+													"hasPlatforms",
+													"ghcRate",
+													"ngnRate",
+													"symbol",
+													"name",
+													"cryptoId",
+													"rate"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"message": {
+											"type": "string"
+										},
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"data",
+										"message",
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/user/assets/{id}": {
+			"get": {
+				"operationId": "GetAsset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"properties": {
+												"__v": {
+													"type": "number",
+													"format": "double"
+												},
+												"_id": {
+													"$ref": "#/components/schemas/mongoose.Types.ObjectId"
+												},
+												"platformAddresses": {
+													"items": {
+														"$ref": "#/components/schemas/mongoose.FlattenMaps__platform-string--address-string__"
+													},
+													"type": "array"
+												},
+												"isActive": {
+													"type": "boolean"
+												},
+												"hasPlatforms": {
+													"type": "boolean"
+												},
+												"description": {
+													"type": "string"
+												},
+												"ghcRate": {
+													"type": "number",
+													"format": "double"
+												},
+												"ngnRate": {
+													"type": "number",
+													"format": "double"
+												},
+												"image": {
+													"type": "string"
+												},
+												"symbol": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"cryptoId": {
+													"type": "string"
+												},
+												"rate": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"__v",
+												"_id",
+												"platformAddresses",
+												"hasPlatforms",
+												"ghcRate",
+												"ngnRate",
+												"symbol",
+												"name",
+												"cryptoId",
+												"rate"
+											],
+											"type": "object"
+										},
+										"message": {
+											"type": "string"
+										},
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"data",
+										"message",
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/user/push-token/{pushToken}": {
@@ -5071,7 +5071,7 @@
 			"description": "localhost dev"
 		},
 		{
-			"url": "https://44.204.180.229",
+			"url": "https://mbexchange-api.mbexchangehub.com",
 			"description": "testing"
 		}
 	]
