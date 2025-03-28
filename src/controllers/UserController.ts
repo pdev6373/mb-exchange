@@ -87,6 +87,7 @@ export class UserController {
 
   @Get('/assets')
   public async getAssets(@Request() req: ExpressRequest) {
+    await AssetModel.deleteMany();
     const userCurrencyCode = (
       req?.user as User
     ).country?.currency?.toLowerCase();
@@ -374,7 +375,6 @@ export class UserController {
 
   @Get('/transactions')
   public async getTransactions(@Request() req: ExpressRequest) {
-    await AssetModel.deleteMany();
     const transactions = await TransactionModel.find({
       'user.id': req.user._id,
     })
