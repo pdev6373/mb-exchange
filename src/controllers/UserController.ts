@@ -9,7 +9,6 @@ import {
   Path,
   Post,
   Delete,
-  Query,
 } from 'tsoa';
 import { User, UserModel } from '../models/User';
 import { successResponse } from '../utils/responseWrapper';
@@ -45,7 +44,7 @@ import bcrypt from 'bcryptjs';
 import { Transaction, TransactionModel } from '../models/Transaction';
 import { AssetModel } from '../models/Asset';
 import { Reward, RewardModel } from '../models/Reward';
-import { ObjectId, Types } from 'mongoose';
+import { ObjectId } from 'mongoose';
 import { CountModel } from '../models/Count';
 import axios from 'axios';
 import { BanksModel } from '../models/Banks';
@@ -368,16 +367,16 @@ export class UserController {
 
   @Get('/rewards')
   public async getRewards(@Request() req: ExpressRequest) {
-    const userId = new Types.ObjectId(req.user._id);
-    const rewards = await RewardModel.find({ 'user.id': userId });
+    const rewards = await RewardModel.find({
+      'user.id': req?.user?._id?.toString(),
+    });
     return successResponse('Rewards fetched successfully', rewards as Reward[]);
   }
 
   @Get('/transactions')
   public async getTransactions(@Request() req: ExpressRequest) {
-    const userId = new Types.ObjectId(req.user._id);
     const transactions = await TransactionModel.find({
-      'user.id': userId,
+      'user.id': req.user._id.toString(),
     })
       .sort({ createdAt: -1 })
       .lean();
