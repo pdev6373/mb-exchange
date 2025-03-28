@@ -45,7 +45,7 @@ import bcrypt from 'bcryptjs';
 import { Transaction, TransactionModel } from '../models/Transaction';
 import { AssetModel } from '../models/Asset';
 import { Reward, RewardModel } from '../models/Reward';
-import { ObjectId } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 import { CountModel } from '../models/Count';
 import axios from 'axios';
 import { BanksModel } from '../models/Banks';
@@ -374,9 +374,9 @@ export class UserController {
 
   @Get('/transactions')
   public async getTransactions(@Request() req: ExpressRequest) {
-    console.log('ddddddddddddddddddd', req?.user?._id);
+    const userId = new Types.ObjectId(req.user._id);
     const transactions = await TransactionModel.find({
-      'user.id': req.user._id,
+      'user.id': userId,
     })
       .sort({ createdAt: -1 })
       .lean();
