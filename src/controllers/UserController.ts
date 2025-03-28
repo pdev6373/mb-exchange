@@ -87,7 +87,6 @@ export class UserController {
 
   @Get('/assets')
   public async getAssets(@Request() req: ExpressRequest) {
-    await AssetModel.deleteMany();
     const userCurrencyCode = (
       req?.user as User
     ).country?.currency?.toLowerCase();
