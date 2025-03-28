@@ -68,11 +68,10 @@ export class UserController {
           Accept: 'application/json',
         },
       });
-      console.log('res', response);
       return response.data.data?.filter((bank: any) => bank.active);
     } catch (error: any) {
       console.error('Error fetching banks from Paystack:', error?.message);
-      throw error;
+      throw new NotFoundError('could not find bank');
     }
   };
 
