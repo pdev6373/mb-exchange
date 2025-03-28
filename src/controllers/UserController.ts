@@ -112,7 +112,6 @@ export class UserController {
           };
         }),
       );
-
     return successResponse('Assets fetched successfully', assets);
   }
 
