@@ -6,7 +6,8 @@ export const AddAssetSchema = z.object({
   symbol: z.string().min(1, 'Asset symbol is required'),
   image: z.string().url({ message: 'Invalid URL' }).optional(),
   rate: z.number().positive('Rate must be a positive number'),
-  vipRate: z.number().positive('VIP rate must be a positive number').optional(),
+  ngnRate: z.number().positive('NGN rate must be a positive number'),
+  ghcRate: z.number().positive('GHC rate must be a positive number'),
   description: z.string().optional(),
   hasPlatforms: z.boolean(),
   isActive: z.boolean().optional(),
@@ -24,7 +25,8 @@ export interface IAddAssetInput {
   symbol: string;
   image?: string;
   rate: number;
-  vipRate?: number;
+  ngnRate: number;
+  ghcRate: number;
   description?: string;
   hasPlatforms: boolean;
   isActive?: boolean;
@@ -36,7 +38,8 @@ export interface IAddAssetInput {
 
 export const UpdateAssetSchema = z.object({
   rate: z.number().positive('Rate must be a positive number').optional(),
-  vipRate: z.number().positive('VIP rate must be a positive number').optional(),
+  ngnRate: z.number().positive('NGN rate must be a positive number').optional(),
+  ghcRate: z.number().positive('GHC rate must be a positive number').optional(),
   hasPlatforms: z.boolean().optional(),
   isActive: z.boolean().optional(),
   platformAddresses: z
@@ -51,7 +54,8 @@ export const UpdateAssetSchema = z.object({
 
 export interface IUpdateAssetInput {
   rate?: number;
-  vipRate?: number;
+  ngnRate?: number;
+  ghcRate?: number;
   hasPlatforms?: boolean;
   isActive?: boolean;
   platformAddresses?: {

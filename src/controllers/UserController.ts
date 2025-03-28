@@ -43,7 +43,7 @@ import {
 } from '../utils/helpers';
 import bcrypt from 'bcryptjs';
 import { Transaction, TransactionModel } from '../models/Transaction';
-import { AssetModel } from '../models/Asset';
+import { Asset, AssetModel } from '../models/Asset';
 import { Reward, RewardModel } from '../models/Reward';
 import { ObjectId } from 'mongoose';
 import { CountModel } from '../models/Count';
@@ -57,6 +57,16 @@ export class UserController {
   private isDataExpired = (lastUpdated: Date) => {
     const threeDaysInMillis = 3 * 24 * 60 * 60 * 1000;
     return Date.now() - lastUpdated.getTime() > threeDaysInMillis;
+  };
+
+  public formatNumber = (number: number) => {
+    const roundedNumber = Math.abs(Math.floor(number * 100) / 100);
+    if (roundedNumber >= 1000)
+      return `${roundedNumber.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+    return `${roundedNumber.toFixed(2)}`;
   };
 
   private fetchBanksFromPaystack = async (country: string) => {
@@ -74,6 +84,66 @@ export class UserController {
       throw new NotFoundError('could not find bank');
     }
   };
+
+  @Get('/assets')
+  public async getAssets(@Request() req: ExpressRequest) {
+    const userCurrencyCode = (
+      req?.user as User
+    ).country?.currency?.toLowerCase();
+
+    const assets = await AssetModel.find()
+      .sort({ createdAt: -1 })
+      .lean()
+      .transform((documents) =>
+        documents.map((asset) => {
+          let displayRate = asset.rate;
+          let currencySymbol = '$';
+
+          if (userCurrencyCode === 'ngn') {
+            displayRate = asset.ngnRate;
+            currencySymbol = '₦';
+          } else if (userCurrencyCode === 'ghs' || userCurrencyCode === 'ghc') {
+            displayRate = asset.ghcRate;
+            currencySymbol = 'GH₵';
+          }
+
+          return {
+            ...asset,
+            rate: `${currencySymbol}${this.formatNumber(displayRate)}`,
+          };
+        }),
+      );
+
+    return successResponse('Assets fetched successfully', assets);
+  }
+
+  @Get('/:id')
+  public async getAsset(@Path() id: string, @Request() req: ExpressRequest) {
+    const userCurrencyCode = (
+      req?.user as User
+    ).country?.currency?.toLowerCase();
+
+    const asset = await AssetModel.findById(id).lean();
+
+    if (!asset) throw new NotFoundError('Asset not found');
+
+    let displayRate = asset.rate;
+    let currencySymbol = '$';
+
+    if (userCurrencyCode === 'ngn') {
+      displayRate = asset.ngnRate;
+      currencySymbol = '₦';
+    } else if (userCurrencyCode === 'ghs' || userCurrencyCode === 'ghc') {
+      displayRate = asset.ghcRate;
+      currencySymbol = 'GH₵';
+    }
+    const formattedAsset = {
+      ...asset,
+      rate: `${currencySymbol}${this.formatNumber(displayRate)}`,
+    };
+
+    return successResponse('Asset fetched successfully', formattedAsset);
+  }
 
   private async getUniqueTransactionId() {
     let transactionId: string = '';

@@ -24,8 +24,11 @@ export class Asset {
   @prop({ required: true })
   public rate!: number;
 
-  @prop()
-  public vipRate?: number;
+  @prop({ required: true })
+  public ngnRate!: number;
+
+  @prop({ required: true })
+  public ghcRate!: number;
 
   @prop()
   public description?: string;

@@ -14,7 +14,6 @@ import { Admin } from './models/Admin';
 import { RoleType } from './types';
 import multer from 'multer';
 import { createServer } from 'http';
-import { initWebSocketServer } from './controllers/CryptoPriceController';
 import { expressAuthentication } from './middleware/authentication';
 
 const storage = multer.memoryStorage();
