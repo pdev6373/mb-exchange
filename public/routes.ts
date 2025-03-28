@@ -31,6 +31,16 @@ const expressAuthenticationRecasted = expressAuthentication as (req: ExRequest, 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+    "mongoose.FlattenMaps__platform-string--address-string__": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "mongoose.Types.ObjectId": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Referrer": {
         "dataType": "refObject",
         "properties": {
@@ -226,7 +236,7 @@ const models: TsoaRoute.Models = {
             "key": {"dataType":"string","required":true},
             "address": {"dataType":"string","required":true},
             "quantity": {"dataType":"double","required":true},
-            "rate": {"dataType":"double","required":true},
+            "rate": {"dataType":"string","required":true},
             "amount": {"dataType":"double"},
             "proof": {"dataType":"string","required":true},
             "dateApproved": {"dataType":"datetime"},
@@ -243,6 +253,7 @@ const models: TsoaRoute.Models = {
             "address": {"dataType":"string","required":true},
             "quantity": {"dataType":"double","required":true},
             "proof": {"dataType":"string","required":true},
+            "rate": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -270,11 +281,6 @@ const models: TsoaRoute.Models = {
     "mongoose.FlattenMaps__name-string--url-string--icon-string__": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "mongoose.Types.ObjectId": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IAddSocialPlatformInput": {
@@ -403,7 +409,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--vipRate_63_-number--description_63_-string--hasPlatforms-boolean--isActive_63_-boolean--platformAddresses_58__platform-string--address-string_-Array__": {
+    "mongoose.FlattenMaps__cryptoId-string--name-string--symbol-string--image_63_-string--rate-number--ngnRate-number--ghcRate-number--description_63_-string--hasPlatforms-boolean--isActive_63_-boolean--platformAddresses_58__platform-string--address-string_-Array__": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
     },
@@ -421,7 +427,8 @@ const models: TsoaRoute.Models = {
             "symbol": {"dataType":"string","required":true},
             "image": {"dataType":"string"},
             "rate": {"dataType":"double","required":true},
-            "vipRate": {"dataType":"double"},
+            "ngnRate": {"dataType":"double","required":true},
+            "ghcRate": {"dataType":"double","required":true},
             "description": {"dataType":"string"},
             "hasPlatforms": {"dataType":"boolean","required":true},
             "isActive": {"dataType":"boolean"},
@@ -434,7 +441,8 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "rate": {"dataType":"double"},
-            "vipRate": {"dataType":"double"},
+            "ngnRate": {"dataType":"double"},
+            "ghcRate": {"dataType":"double"},
             "hasPlatforms": {"dataType":"boolean"},
             "isActive": {"dataType":"boolean"},
             "platformAddresses": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"address":{"dataType":"string","required":true},"platform":{"dataType":"string","required":true}}}},
@@ -532,6 +540,69 @@ export function RegisterRoutes(app: Router,opts?:{multer?:ReturnType<typeof mult
     const upload = opts?.multer ||  multer({"limits":{"fileSize":8388608}});
 
     
+        const argsUserController_getAssets: Record<string, TsoaRoute.ParameterSchema> = {
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.get('/user/assets',
+            authenticateMiddleware([{"BearerAuth":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(UserController)),
+            ...(fetchMiddlewares<RequestHandler>(UserController.prototype.getAssets)),
+
+            async function UserController_getAssets(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsUserController_getAssets, request, response });
+
+                const controller = new UserController();
+
+              await templateService.apiHandler({
+                methodName: 'getAssets',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsUserController_getAsset: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
+        };
+        app.get('/user/:id',
+            authenticateMiddleware([{"BearerAuth":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(UserController)),
+            ...(fetchMiddlewares<RequestHandler>(UserController.prototype.getAsset)),
+
+            async function UserController_getAsset(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsUserController_getAsset, request, response });
+
+                const controller = new UserController();
+
+              await templateService.apiHandler({
+                methodName: 'getAsset',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsUserController_getUser: Record<string, TsoaRoute.ParameterSchema> = {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
