@@ -77,8 +77,10 @@ export class UserController {
           Accept: 'application/json',
         },
       });
+      console.log('ddd', response);
       return response.data.data?.filter((bank: any) => bank.active);
     } catch (error: any) {
+      console.log('sdds', error);
       throw new NotFoundError('could not find bank');
     }
   };
