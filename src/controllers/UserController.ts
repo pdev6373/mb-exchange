@@ -43,7 +43,7 @@ import {
 } from '../utils/helpers';
 import bcrypt from 'bcryptjs';
 import { Transaction, TransactionModel } from '../models/Transaction';
-import { Asset, AssetModel } from '../models/Asset';
+import { AssetModel } from '../models/Asset';
 import { Reward, RewardModel } from '../models/Reward';
 import { ObjectId } from 'mongoose';
 import { CountModel } from '../models/Count';
@@ -402,7 +402,7 @@ export class UserController {
     @Body() data: IMakeTransactionInput,
     @Request() req: ExpressRequest,
   ) {
-    const { assetId, address, quantity, proof, platform } = data;
+    const { assetId, address, quantity, proof, platform, rate } = data;
     const assetExist = await AssetModel.findById(assetId);
     if (!assetExist) throw new NotFoundError('Asset not found');
 
@@ -435,7 +435,7 @@ export class UserController {
       quantity,
       address,
       proof,
-      rate: assetExist.rate,
+      rate,
       status: TransactionStatus.PENDING,
       key,
     });

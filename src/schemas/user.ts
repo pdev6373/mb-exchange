@@ -97,6 +97,7 @@ export const MakeTransactionSchema = z.object({
     .string()
     .url({ message: 'Invalid URL' })
     .min(1, { message: 'Proof is required' }),
+  rate: z.string().min(1, 'Rate is required'),
 });
 
 export interface IMakeTransactionInput {
@@ -105,6 +106,7 @@ export interface IMakeTransactionInput {
   address: string;
   quantity: number;
   proof: string;
+  rate: string;
 }
 
 export const AddBankSchema = z.object({

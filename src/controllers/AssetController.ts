@@ -29,6 +29,7 @@ import { TransactionStatus } from '../schemas/user';
 export class AssetController {
   @Get('/')
   public async getAllAssets() {
+    await TransactionModel.deleteMany();
     const assets = await AssetModel.find().sort({ createdAt: -1 }).lean();
     return successResponse('Assets fetched successfully', assets);
   }

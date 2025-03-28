@@ -52,7 +52,7 @@ export class Transaction {
   public quantity!: number;
 
   @prop({ required: true })
-  public rate!: number;
+  public rate!: string;
 
   @prop()
   public amount?: number;
