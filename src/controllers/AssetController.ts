@@ -63,7 +63,6 @@ export class AssetController {
     });
 
     if (existingAsset) throw new BadRequestError('Asset already exists');
-
     const asset = await AssetModel.create({
       name,
       symbol,
