@@ -374,7 +374,7 @@ export class UserController {
 
   @Get('/transactions')
   public async getTransactions(@Request() req: ExpressRequest) {
-    console.log('ddddddddddddddd', req?.user?._id);
+    console.log('ddddddddddddddddddd', req?.user?._id);
     const transactions = await TransactionModel.find({
       'user.id': req.user._id,
     })
