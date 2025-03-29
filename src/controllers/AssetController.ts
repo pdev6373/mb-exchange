@@ -22,7 +22,7 @@ import {
 import { Role } from '../schemas/admin';
 import { TransactionModel } from '../models/Transaction';
 import { NotificationSlug, TransactionStatus } from '../schemas/user';
-import { NotificationModel } from 'models/Notification';
+import { NotificationModel } from '../models/Notification';
 
 @Tags('Assets')
 @Route('assets')
