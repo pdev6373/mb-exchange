@@ -304,7 +304,7 @@ export class UserController {
             currencySymbol = '₦';
           } else if (userCurrencyCode === 'ghs' || userCurrencyCode === 'ghc') {
             displayRate = asset.ghcRate;
-            currencySymbol = 'GH₵';
+            currencySymbol = '₵';
           }
 
           return {
@@ -334,7 +334,7 @@ export class UserController {
       currencySymbol = '₦';
     } else if (userCurrencyCode === 'ghs' || userCurrencyCode === 'ghc') {
       displayRate = asset.ghcRate;
-      currencySymbol = 'GH₵';
+      currencySymbol = '₵';
     }
     const formattedAsset = {
       ...asset,
