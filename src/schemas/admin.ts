@@ -38,10 +38,10 @@ export interface IUpdateAdminInput {
 
 export const AddNotificationSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  message: z.string().min(1, 'Message is required'),
+  content: z.string().min(1, 'Content is required'),
 });
 
 export interface IAddNotificationInput {
   title: string;
-  message: string;
+  content: string;
 }

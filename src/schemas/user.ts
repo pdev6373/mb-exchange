@@ -18,6 +18,18 @@ export enum RewardStatus {
   SUCCESS = 'successful',
 }
 
+export enum NotificationSlug {
+  PRICE_UP = 'price_up',
+  PRICE_DOWN = 'price_down',
+  COMPLETED = 'completed',
+  SECURITY = 'security',
+  CANCELED = 'canceled',
+  PENDING = 'pending',
+  INFO = 'info',
+  SYSTEM = 'system',
+  ADD = 'add',
+}
+
 export const UpdatecProfileSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),

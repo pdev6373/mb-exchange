@@ -9,6 +9,7 @@ import {
   Path,
   Post,
   Delete,
+  Query,
 } from 'tsoa';
 import { User, UserModel } from '../models/User';
 import { successResponse } from '../utils/responseWrapper';
@@ -48,6 +49,7 @@ import { ObjectId } from 'mongoose';
 import { CountModel } from '../models/Count';
 import axios from 'axios';
 import { BanksModel } from '../models/Banks';
+import { Notification, NotificationModel } from '../models/Notification';
 
 @Tags('User')
 @Route('user')
@@ -267,6 +269,43 @@ export class UserController {
       enable ? 'Notifications enabled' : 'Notifications disabled',
       user?.notificationsEnabled,
     );
+  }
+
+  @Get('/notifications')
+  public async getNotifications(
+    @Query() page = 1,
+    @Query() limit = 10,
+    @Query() sort?: 'asc' | 'desc',
+    @Query() search?: string,
+  ) {
+    const filter: any = {
+      // User id is user._id
+    };
+    if (search)
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
+      ];
+
+    const skip = (Number(page) - 1) * Number(limit);
+    const notifications = await NotificationModel.find(filter)
+      .sort({
+        createdAt: sort || 'desc',
+      })
+      .skip(skip)
+      .limit(Number(limit))
+      .lean();
+
+    const totalNotifications = await NotificationModel.countDocuments(filter);
+    return successResponse('Notifications fetched successfully', {
+      data: notifications as Notification[],
+      pagination: {
+        total: totalNotifications,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(totalNotifications / Number(limit)),
+      },
+    });
   }
 
   @Get('/assets')

@@ -21,7 +21,8 @@ import {
 } from '../schemas/asset';
 import { Role } from '../schemas/admin';
 import { TransactionModel } from '../models/Transaction';
-import { TransactionStatus } from '../schemas/user';
+import { NotificationSlug, TransactionStatus } from '../schemas/user';
+import { NotificationModel } from 'models/Notification';
 
 @Tags('Assets')
 @Route('assets')
@@ -77,6 +78,11 @@ export class AssetController {
       cryptoId,
     });
 
+    await NotificationModel.create({
+      title: 'New asset added',
+      content: 'New asset added',
+      slug: NotificationSlug.ADD,
+    });
     return successResponse('Asset created successfully', asset.toJSON());
   }
 
@@ -99,7 +105,14 @@ export class AssetController {
     const asset = await AssetModel.findById(id);
     if (!asset) throw new NotFoundError('Asset not found');
 
-    if (rate) asset.rate = rate;
+    if (rate) {
+      asset.rate = rate;
+      await NotificationModel.create({
+        title: 'New rate',
+        content: 'New rate added',
+        slug: NotificationSlug.ADD,
+      });
+    }
     if (ngnRate !== undefined) asset.ngnRate = ngnRate;
     if (ghcRate !== undefined) asset.ghcRate = ghcRate;
     if (hasPlatforms) asset.hasPlatforms = hasPlatforms;

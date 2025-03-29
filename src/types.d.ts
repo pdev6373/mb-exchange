@@ -1,4 +1,9 @@
-import { Gender, RewardStatus, TransactionStatus } from './schemas/user';
+import {
+  Gender,
+  NotificationSlug,
+  RewardStatus,
+  TransactionStatus,
+} from './schemas/user';
 import { Role } from './schemas/admin';
 
 export type ApiResponse<T = any> = {
@@ -16,6 +21,7 @@ export type RoleType = `${Role}`;
 export type TransactionStatusType = `${TransactionStatus}`;
 export type RewardStatusType = `${RewardStatus}`;
 export type GenderType = `${Gender}`;
+export type NotificationSlugType = `${NotificationSlug}`;
 
 export type GenerateTokens = {
   email: string;

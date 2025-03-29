@@ -36,7 +36,11 @@ import {
 } from '../utils/helpers';
 import bcrypt from 'bcryptjs';
 import { Admin, AdminModel } from '../models/Admin';
-import { IUpdatePasswordInput, UpdatePasswordSchema } from '../schemas/user';
+import {
+  IUpdatePasswordInput,
+  NotificationSlug,
+  UpdatePasswordSchema,
+} from '../schemas/user';
 import { sendMail } from '../utils/mailSender';
 import { Transaction, TransactionModel } from '../models/Transaction';
 import { RewardStatusType, TransactionStatusType } from '../types';
@@ -355,8 +359,21 @@ export class AdminController {
 
     const previousStatus = transaction.status;
     transaction.status = status;
-    if (status == 'pending') transaction.dateApproved = undefined;
-    else transaction.dateApproved = new Date();
+    if (status == 'pending') {
+      transaction.dateApproved = undefined;
+      await NotificationModel.create({
+        title: 'Transaction pending',
+        content: 'New rate added',
+        slug: NotificationSlug.PENDING,
+      });
+    } else {
+      transaction.dateApproved = new Date();
+      await NotificationModel.create({
+        title: 'Transaction Successful',
+        content: 'New rate added',
+        slug: NotificationSlug.COMPLETED,
+      });
+    }
     transaction.amount = amount;
     await transaction.save();
 
@@ -707,8 +724,21 @@ export class AdminController {
 
     const previousStatus = reward.status;
     reward.status = status;
-    if (status == 'pending') reward.dateApproved = undefined;
-    else reward.dateApproved = new Date();
+    if (status == 'pending') {
+      reward.dateApproved = undefined;
+      await NotificationModel.create({
+        title: 'Reward pending',
+        content: 'New rate added',
+        slug: NotificationSlug.ADD,
+      });
+    } else {
+      reward.dateApproved = new Date();
+      await NotificationModel.create({
+        title: 'Reward paid',
+        content: 'New rate added',
+        slug: NotificationSlug.ADD,
+      });
+    }
     await reward.save();
 
     if (status == 'successful') {
@@ -820,12 +850,13 @@ export class AdminController {
     @Query() sort?: 'asc' | 'desc',
     @Query() search?: string,
   ) {
-    const filter: any = {};
-
+    const filter: any = {
+      // Where there is no user id
+    };
     if (search)
       filter.$or = [
         { title: { $regex: search, $options: 'i' } },
-        { message: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
       ];
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -852,16 +883,13 @@ export class AdminController {
   @Post('/notifications')
   @Validate(AddNotificationSchema)
   public async addNotification(@Body() data: IAddNotificationInput) {
-    const { message, title } = data;
-    const notification = await NotificationModel.create({
-      message,
+    const { content, title } = data;
+    await NotificationModel.create({
+      content,
       title,
+      slug: NotificationSlug.INFO,
     });
-
-    return successResponse(
-      'Notification added successfully',
-      notification as Notification,
-    );
+    return successResponse('Notification added successfully');
   }
 
   @Get('/counts')
