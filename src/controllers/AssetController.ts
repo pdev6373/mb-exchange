@@ -79,8 +79,9 @@ export class AssetController {
     });
 
     await NotificationModel.create({
-      title: 'New asset added',
-      content: 'New asset added',
+      title: '🔥 New Asset Available!',
+      content:
+        'A new asset has just been listed! Check it out now and don’t miss the opportunity. 🚀',
       slug: NotificationSlug.ADD,
     });
     return successResponse('Asset created successfully', asset.toJSON());
@@ -108,9 +109,9 @@ export class AssetController {
     if (rate) {
       asset.rate = rate;
       await NotificationModel.create({
-        title: 'New rate',
-        content: 'New rate added',
-        slug: NotificationSlug.ADD,
+        title: '📢 Price Update Alert!',
+        content: `The price of ${asset.name} has changed! Check the latest rate and trade wisely. 💹`,
+        slug: NotificationSlug.PRICE_UP,
       });
     }
     if (ngnRate !== undefined) asset.ngnRate = ngnRate;

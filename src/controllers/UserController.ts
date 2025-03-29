@@ -272,40 +272,17 @@ export class UserController {
   }
 
   @Get('/notifications')
-  public async getNotifications(
-    @Query() page = 1,
-    @Query() limit = 10,
-    @Query() sort?: 'asc' | 'desc',
-    @Query() search?: string,
-  ) {
-    const filter: any = {
-      // User id is user._id
-    };
-    if (search)
-      filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } },
-      ];
-
-    const skip = (Number(page) - 1) * Number(limit);
-    const notifications = await NotificationModel.find(filter)
-      .sort({
-        createdAt: sort || 'desc',
-      })
-      .skip(skip)
-      .limit(Number(limit))
-      .lean();
-
-    const totalNotifications = await NotificationModel.countDocuments(filter);
-    return successResponse('Notifications fetched successfully', {
-      data: notifications as Notification[],
-      pagination: {
-        total: totalNotifications,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(totalNotifications / Number(limit)),
-      },
+  public async getNotifications(@Request() req: ExpressRequest) {
+    const notifications = await NotificationModel.find({
+      userId: req.user._id,
+    }).sort({
+      createdAt: 'desc',
     });
+
+    return successResponse(
+      'Notifications fetched successfully',
+      notifications as Notification[],
+    );
   }
 
   @Get('/assets')

@@ -194,7 +194,6 @@ export class AdminController {
     @Query() page = 1,
     @Query() limit = 10,
     @Query() status: 'active' | 'inactive' | 'all' = 'all',
-
     @Query() sort?: 'asc' | 'desc',
     @Query() search?: string,
   ) {
@@ -362,17 +361,27 @@ export class AdminController {
     if (status == 'pending') {
       transaction.dateApproved = undefined;
       await NotificationModel.create({
-        title: 'Transaction pending',
-        content: 'New rate added',
+        title: '⏳ Hold on! Double-Checking Your Order',
+        content:
+          "Your transaction is being reviewed again for accuracy. We'll update you soon!",
         slug: NotificationSlug.PENDING,
       });
     } else {
       transaction.dateApproved = new Date();
-      await NotificationModel.create({
-        title: 'Transaction Successful',
-        content: 'New rate added',
-        slug: NotificationSlug.COMPLETED,
-      });
+      if (status == 'successful')
+        await NotificationModel.create({
+          title: '🎉 Crypto Received, Money Sent!',
+          content:
+            "Your transaction is complete! We've sent your payment. Thanks for selling with us!",
+          slug: NotificationSlug.COMPLETED,
+        });
+      else
+        await NotificationModel.create({
+          title: '⚠️ No Crypto Received!',
+          content:
+            'We haven’t received your transfer yet. Please send the crypto to complete your sale!',
+          slug: NotificationSlug.CANCELED,
+        });
     }
     transaction.amount = amount;
     await transaction.save();
@@ -727,16 +736,18 @@ export class AdminController {
     if (status == 'pending') {
       reward.dateApproved = undefined;
       await NotificationModel.create({
-        title: 'Reward pending',
-        content: 'New rate added',
-        slug: NotificationSlug.ADD,
+        title: '⏳ Hold on! Reviewing Your Reward',
+        content:
+          "We're taking another look at your reward cashout. No action needed—just sit tight!",
+        slug: NotificationSlug.PENDING,
       });
     } else {
       reward.dateApproved = new Date();
       await NotificationModel.create({
-        title: 'Reward paid',
-        content: 'New rate added',
-        slug: NotificationSlug.ADD,
+        title: '💸 Reward Sent!',
+        content:
+          'Congrats! Your reward has been sent. Check your account and enjoy your earnings! 🎊',
+        slug: NotificationSlug.COMPLETED,
       });
     }
     await reward.save();
@@ -851,12 +862,20 @@ export class AdminController {
     @Query() search?: string,
   ) {
     const filter: any = {
-      // Where there is no user id
+      $or: [{ userId: { $exists: false } }, { userId: null }],
     };
+
     if (search)
-      filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } },
+      filter.$and = [
+        {
+          $or: [{ userId: { $exists: false } }, { userId: null }],
+        },
+        {
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { content: { $regex: search, $options: 'i' } },
+          ],
+        },
       ];
 
     const skip = (Number(page) - 1) * Number(limit);
