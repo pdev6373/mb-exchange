@@ -279,9 +279,8 @@ export class UserController {
         { userId: { $exists: false } },
         { userId: null },
       ],
-    }).sort({
-      createdAt: 'desc',
-    });
+      createdAt: { $gte: (req.user as User).createdAt },
+    }).sort({ createdAt: 'desc' });
 
     return successResponse(
       'Notifications fetched successfully',
