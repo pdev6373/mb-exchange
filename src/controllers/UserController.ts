@@ -613,6 +613,15 @@ export class UserController {
     if (!user) throw new NotFoundError('User not found');
 
     if (!user.banks) user.banks = [];
+
+    const bankExist = user?.banks?.find(
+      (bank) =>
+        bank?.accountNumber?.toLowerCase() == accountNumber?.toLowerCase() &&
+        bank?.accountName?.toLowerCase() == accountName &&
+        bank?.bankName?.toLowerCase() == bankName?.toLowerCase(),
+    );
+
+    if (bankExist) throw new BadRequestError('Bank account exists');
     if (user.banks.length >= 5)
       throw new BadRequestError('Maximum of 5 accounts allowed');
 
