@@ -381,7 +381,7 @@ export class AdminController {
         await NotificationModel.create({
           title: '⚠️ No Crypto Received!',
           content:
-            'We haven’t received your transfer yet. Please send the crypto to complete your sale!',
+            "We didn't receive your crypto transfer. Please check your transaction details and ensure it was sent to the correct address.",
           slug: NotificationSlug.CANCELED,
           userId: user._id,
         });
