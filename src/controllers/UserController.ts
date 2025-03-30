@@ -274,7 +274,11 @@ export class UserController {
   @Get('/notifications')
   public async getNotifications(@Request() req: ExpressRequest) {
     const notifications = await NotificationModel.find({
-      userId: req.user._id,
+      $or: [
+        { userId: req.user._id },
+        { userId: { $exists: false } },
+        { userId: null },
+      ],
     }).sort({
       createdAt: 'desc',
     });

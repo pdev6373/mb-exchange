@@ -365,6 +365,7 @@ export class AdminController {
         content:
           "Your transaction is being reviewed again for accuracy. We'll update you soon!",
         slug: NotificationSlug.PENDING,
+        userId: user._id,
       });
     } else {
       transaction.dateApproved = new Date();
@@ -374,6 +375,7 @@ export class AdminController {
           content:
             "Your transaction is complete! We've sent your payment. Thanks for selling with us!",
           slug: NotificationSlug.COMPLETED,
+          userId: user._id,
         });
       else
         await NotificationModel.create({
@@ -381,6 +383,7 @@ export class AdminController {
           content:
             'We haven’t received your transfer yet. Please send the crypto to complete your sale!',
           slug: NotificationSlug.CANCELED,
+          userId: user._id,
         });
     }
     transaction.amount = amount;
@@ -740,6 +743,7 @@ export class AdminController {
         content:
           "We're taking another look at your reward cashout. No action needed—just sit tight!",
         slug: NotificationSlug.PENDING,
+        userId: user._id,
       });
     } else {
       reward.dateApproved = new Date();
@@ -748,6 +752,7 @@ export class AdminController {
         content:
           'Congrats! Your reward has been sent. Check your account and enjoy your earnings! 🎊',
         slug: NotificationSlug.COMPLETED,
+        userId: user._id,
       });
     }
     await reward.save();
