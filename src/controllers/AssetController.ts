@@ -78,12 +78,13 @@ export class AssetController {
       cryptoId,
     });
 
-    await NotificationModel.create({
-      title: '🔥 New Asset Available!',
-      content:
-        'A new asset has just been listed! Check it out now and don’t miss the opportunity. 🚀',
-      slug: NotificationSlug.ADD,
-    });
+    const notification = new NotificationModel();
+    notification.title = '🔥 New Asset Available!';
+    notification.content =
+      'A new asset has just been listed! Check it out now and don’t miss the opportunity. 🚀';
+    notification.slug = NotificationSlug.ADD;
+    await notification.save();
+
     return successResponse('Asset created successfully', asset.toJSON());
   }
 
@@ -108,11 +109,12 @@ export class AssetController {
 
     if (rate) {
       asset.rate = rate;
-      await NotificationModel.create({
-        title: '📢 Price Update Alert!',
-        content: `The price of ${asset.name} has changed! Check the latest rate and trade wisely. 💹`,
-        slug: NotificationSlug.PRICE_UP,
-      });
+
+      const notification = new NotificationModel();
+      notification.title = '📢 Price Update Alert!';
+      notification.content = `The price of ${asset.name} has changed! Check the latest rate and trade wisely. 💹`;
+      notification.slug = NotificationSlug.PRICE_UP;
+      await notification.save();
     }
     if (ngnRate !== undefined) asset.ngnRate = ngnRate;
     if (ghcRate !== undefined) asset.ghcRate = ghcRate;
