@@ -617,7 +617,7 @@ export class UserController {
     const bankExist = user?.banks?.find(
       (bank) =>
         bank?.accountNumber?.toLowerCase() == accountNumber?.toLowerCase() &&
-        bank?.accountName?.toLowerCase() == accountName &&
+        bank?.accountName?.toLowerCase() == accountName?.toLowerCase() &&
         bank?.bankName?.toLowerCase() == bankName?.toLowerCase(),
     );
 
