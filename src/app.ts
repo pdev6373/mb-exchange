@@ -44,6 +44,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [
+  'http://localhost:3000',
   'https://mbexchangehub.com',
   'https://admin-access-portal.mbexchangehub.com',
   'https://mbexchange-api.mbexchangehub.com',
