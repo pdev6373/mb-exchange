@@ -140,25 +140,6 @@ export class AdminController {
     return successResponse('Profile updated successfully', admin as Admin);
   }
 
-  @Patch('/:id')
-  @Validate(UpdateAdminSchema)
-  @Security('BearerAuth', [Role.SUPER_ADMIN])
-  public async updateAdminData(
-    @Path() id: string,
-    @Body() data: IUpdateAdminInput,
-    @Request() req: ExpressRequest,
-  ) {
-    const { name, role } = data;
-    const admin = await AdminModel.findById(id);
-    if (!admin) throw new NotFoundError('Admin not found');
-
-    if (name) admin.name = name;
-    if (role && admin.role !== 'superadmin') admin.role = role;
-    await admin.save();
-
-    return successResponse('Admin updated successfully', admin as Admin);
-  }
-
   @Delete('/:id')
   @Security('BearerAuth', [Role.SUPER_ADMIN])
   public async removeAdmin(@Path() id: string, @Request() req: ExpressRequest) {
@@ -187,6 +168,24 @@ export class AdminController {
     await admin.save();
 
     return successResponse('Password updated successfully');
+  }
+
+  @Patch('/:id')
+  @Validate(UpdateAdminSchema)
+  @Security('BearerAuth', [Role.SUPER_ADMIN])
+  public async updateAdminData(
+    @Path() id: string,
+    @Body() data: IUpdateAdminInput,
+  ) {
+    const { name, role } = data;
+    const admin = await AdminModel.findById(id);
+    if (!admin) throw new NotFoundError('Admin not found');
+
+    if (name) admin.name = name;
+    if (role && admin.role !== 'superadmin') admin.role = role;
+    await admin.save();
+
+    return successResponse('Admin updated successfully', admin as Admin);
   }
 
   @Get('/users')
