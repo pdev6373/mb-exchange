@@ -101,7 +101,7 @@ export class AdminController {
     admin.invitationToken = token.accessToken;
     await admin.save();
 
-    const invitationLink = `${process.env.FRONTEND_URL}/auth/admin/invite?token=${token.accessToken}`;
+    const invitationLink = `https://mbexchangehub.com/auth/admin/invite?token=${token.accessToken}`;
 
     await sendMail({
       subject: 'Admin Invitation',
