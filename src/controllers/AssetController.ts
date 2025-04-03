@@ -112,7 +112,7 @@ export class AssetController {
 
       const notification = new NotificationModel();
       notification.title = '📢 Price Update Alert!';
-      notification.content = `The price of ${asset.name} has changed! Check the latest rate and trade wisely. 💹`;
+      notification.content = `${asset.name} rate has changed! Check the latest rate and trade wisely. 💹`;
       notification.slug = NotificationSlug.PRICE_UP;
       await notification.save();
     }
