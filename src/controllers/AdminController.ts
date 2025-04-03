@@ -157,6 +157,7 @@ export class AdminController {
     @Request() req: ExpressRequest,
   ) {
     const { newPassword, oldPassword } = data;
+
     const admin = await AdminModel.findById(req.user?._id);
     if (!admin) throw new NotFoundError('Admin not found');
 
