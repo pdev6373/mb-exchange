@@ -37,13 +37,16 @@ import {
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { Validate } from '../middleware/validateRequest';
-import { errorResponse, successResponse } from '../utils/responseWrapper';
+import { successResponse } from '../utils/responseWrapper';
 import {
   BadRequestError,
   NotFoundError,
   UnauthorizedError,
 } from '../utils/customErrors';
-import { Request as ExpressRequest } from 'express';
+import {
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+} from 'express';
 import {
   generateOtp,
   generateTokens,
@@ -58,6 +61,8 @@ import {
 import { sendMail } from '../utils/mailSender';
 import { CountModel } from '../models/Count';
 import { ReasonModel } from '../models/Reason';
+import { rateLimiter } from '../middleware/rateLimit';
+import { promisifyMiddleware } from '../utils/promisifyMiddleware';
 
 @Tags('Auth')
 @Route('auth')
@@ -80,7 +85,12 @@ export class AuthController {
 
   @Post('/send-otp')
   @Validate(SendOtpSchema)
-  public async sendOtp(@Body() data: ISendOtpInput) {
+  public async sendOtp(
+    @Body() data: ISendOtpInput,
+    @Request() req: ExpressRequest,
+  ) {
+    await promisifyMiddleware(rateLimiter)(req, {} as ExpressResponse);
+
     let { email, type } = data;
     email = email.toLowerCase();
 

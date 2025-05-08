@@ -307,6 +307,44 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"NotificationSlugType": {
+				"type": "string",
+				"enum": [
+					"price_up",
+					"price_down",
+					"completed",
+					"security",
+					"canceled",
+					"pending",
+					"info",
+					"system",
+					"add"
+				],
+				"nullable": false
+			},
+			"Notification": {
+				"properties": {
+					"title": {
+						"type": "string"
+					},
+					"content": {
+						"type": "string"
+					},
+					"slug": {
+						"$ref": "#/components/schemas/NotificationSlugType"
+					},
+					"userId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"title",
+					"content",
+					"slug"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"mongoose.FlattenMaps__platform-string--address-string__": {
 				"properties": {},
 				"type": "object"
@@ -1014,34 +1052,18 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Notification": {
-				"properties": {
-					"title": {
-						"type": "string"
-					},
-					"message": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"title",
-					"message"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"IAddNotificationInput": {
 				"properties": {
 					"title": {
 						"type": "string"
 					},
-					"message": {
+					"content": {
 						"type": "string"
 					}
 				},
 				"required": [
 					"title",
-					"message"
+					"content"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1324,6 +1346,51 @@
 						}
 					}
 				}
+			}
+		},
+		"/user/notifications": {
+			"get": {
+				"operationId": "GetNotifications",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/Notification"
+											},
+											"type": "array"
+										},
+										"message": {
+											"type": "string"
+										},
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"data",
+										"message",
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/user/assets": {
@@ -3626,6 +3693,55 @@
 			}
 		},
 		"/admin/{id}": {
+			"delete": {
+				"operationId": "RemoveAdmin",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {},
+										"message": {
+											"type": "string"
+										},
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"data",
+										"message",
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"BearerAuth": [
+							"superadmin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
 			"patch": {
 				"operationId": "UpdateAdminData",
 				"responses": {
@@ -3686,55 +3802,6 @@
 						}
 					}
 				}
-			},
-			"delete": {
-				"operationId": "RemoveAdmin",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"data": {},
-										"message": {
-											"type": "string"
-										},
-										"success": {
-											"type": "boolean"
-										}
-									},
-									"required": [
-										"data",
-										"message",
-										"success"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Admin"
-				],
-				"security": [
-					{
-						"BearerAuth": [
-							"superadmin"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
 			}
 		},
 		"/admin/password": {
@@ -4762,9 +4829,7 @@
 							"application/json": {
 								"schema": {
 									"properties": {
-										"data": {
-											"$ref": "#/components/schemas/Notification"
-										},
+										"data": {},
 										"message": {
 											"type": "string"
 										},
