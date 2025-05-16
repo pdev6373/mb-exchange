@@ -1761,10 +1761,22 @@
 								"schema": {
 									"properties": {
 										"data": {
-											"items": {
-												"$ref": "#/components/schemas/Transaction"
+											"properties": {
+												"transactions": {
+													"items": {
+														"$ref": "#/components/schemas/Transaction"
+													},
+													"type": "array"
+												},
+												"user": {
+													"$ref": "#/components/schemas/User"
+												}
 											},
-											"type": "array"
+											"required": [
+												"transactions",
+												"user"
+											],
+											"type": "object"
 										},
 										"message": {
 											"type": "string"
