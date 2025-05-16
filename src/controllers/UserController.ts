@@ -399,10 +399,10 @@ export class UserController {
       .sort({ createdAt: -1 })
       .lean();
 
-    return successResponse('Transactions fetched successfully', {
-      user: req?.user as User,
-      transactions: transactions as Transaction[],
-    });
+    return successResponse(
+      'Transactions fetched successfully',
+      transactions as Transaction[],
+    );
   }
 
   @Get('/transactions/:id')

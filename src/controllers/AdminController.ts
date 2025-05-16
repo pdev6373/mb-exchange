@@ -320,10 +320,13 @@ export class AdminController {
   @Get('/transactions/:id')
   public async getTransaction(@Path() id: string) {
     const transaction = await TransactionModel.findById(id).lean();
-    return successResponse(
-      'Transaction fetched successfully',
-      transaction as Transaction,
-    );
+    const user = await UserModel.findById(transaction?.user?.id)
+      .select('-password -pin')
+      .lean();
+    return successResponse('Transaction fetched successfully', {
+      user: user as User,
+      transaction: transaction as Transaction,
+    });
   }
 
   @Get('/transactions/user/:id')
