@@ -94,6 +94,8 @@ export class AuthController {
     let { email, type } = data;
     email = email.toLowerCase();
 
+    console.log({ email, type });
+
     let user = await UserModel.findOne({ email });
 
     if (type === OTPType.REGISTER) {
