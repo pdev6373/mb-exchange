@@ -61,7 +61,7 @@ import {
 import { sendMail } from '../utils/mailSender';
 import { CountModel } from '../models/Count';
 import { ReasonModel } from '../models/Reason';
-import { rateLimiter } from '../middleware/rateLimit';
+// import { rateLimiter } from '../middleware/rateLimit';
 import { promisifyMiddleware } from '../utils/promisifyMiddleware';
 
 @Tags('Auth')
@@ -89,7 +89,7 @@ export class AuthController {
     @Body() data: ISendOtpInput,
     @Request() req: ExpressRequest,
   ) {
-    await promisifyMiddleware(rateLimiter)(req, {} as ExpressResponse);
+    // await promisifyMiddleware(rateLimiter)(req, {} as ExpressResponse);
 
     let { email, type } = data;
     email = email.toLowerCase();
