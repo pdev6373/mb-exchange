@@ -40,6 +40,7 @@ declare global {
 const app = express();
 const server = createServer(app);
 
+app.set('trust proxy', true);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
