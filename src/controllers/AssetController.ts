@@ -50,7 +50,6 @@ export class AssetController {
       rate,
       symbol,
       ngnRate,
-      ghcRate,
       image,
       hasPlatforms,
       description,
@@ -70,7 +69,6 @@ export class AssetController {
       image,
       rate,
       ngnRate,
-      ghcRate,
       platformAddresses,
       hasPlatforms,
       description,
@@ -95,14 +93,7 @@ export class AssetController {
     @Path() id: string,
     @Body() data: IUpdateAssetInput,
   ) {
-    const {
-      platformAddresses,
-      rate,
-      ngnRate,
-      ghcRate,
-      hasPlatforms,
-      isActive,
-    } = data;
+    const { platformAddresses, rate, ngnRate, hasPlatforms, isActive } = data;
 
     const asset = await AssetModel.findById(id);
     if (!asset) throw new NotFoundError('Asset not found');
@@ -117,7 +108,6 @@ export class AssetController {
       await notification.save();
     }
     if (ngnRate !== undefined) asset.ngnRate = ngnRate;
-    if (ghcRate !== undefined) asset.ghcRate = ghcRate;
     if (hasPlatforms) asset.hasPlatforms = hasPlatforms;
     if (isActive !== undefined) asset.isActive = isActive;
     if (platformAddresses?.length) asset.platformAddresses = platformAddresses;
