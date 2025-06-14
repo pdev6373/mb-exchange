@@ -85,7 +85,7 @@ export class AssetController {
   }
 
   @Patch('/:id')
-  @Validate(UpdateAssetSchema)
+  // @Validate(UpdateAssetSchema)
   @Security('BearerAuth', Object.values(Role))
   public async updateAsset(
     @Path() id: string,
