@@ -91,6 +91,7 @@ export class AssetController {
     @Path() id: string,
     @Body() data: IUpdateAssetInput,
   ) {
+    console.log('Hello');
     const { platformAddresses, ngnRate, hasPlatforms, isActive } = data;
 
     const asset = await AssetModel.findById(id);
