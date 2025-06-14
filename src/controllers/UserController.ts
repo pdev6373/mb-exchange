@@ -299,13 +299,8 @@ export class UserController {
       .lean()
       .transform((documents) =>
         documents.map((asset) => {
-          let displayRate = asset.rate;
-          let currencySymbol = '$';
-
-          if (userCurrencyCode === 'ngn') {
-            displayRate = asset.ngnRate;
-            currencySymbol = '₦';
-          }
+          let displayRate = asset.ngnRate;
+          let currencySymbol = '₦';
 
           return {
             ...asset,
@@ -326,13 +321,8 @@ export class UserController {
 
     if (!asset) throw new NotFoundError('Asset not found');
 
-    let displayRate = asset.rate;
-    let currencySymbol = '$';
-
-    if (userCurrencyCode === 'ngn') {
-      displayRate = asset.ngnRate;
-      currencySymbol = '₦';
-    }
+    let displayRate = asset.ngnRate;
+    let currencySymbol = '₦';
 
     const formattedAsset = {
       ...asset,

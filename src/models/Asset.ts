@@ -22,9 +22,6 @@ export class Asset {
   public image?: string;
 
   @prop({ required: true })
-  public rate!: number;
-
-  @prop({ required: true })
   public ngnRate!: number;
 
   @prop()

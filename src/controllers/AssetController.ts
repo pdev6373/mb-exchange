@@ -47,7 +47,6 @@ export class AssetController {
   public async createAsset(@Body() data: IAddAssetInput) {
     const {
       name,
-      rate,
       symbol,
       ngnRate,
       image,
@@ -67,7 +66,6 @@ export class AssetController {
       name,
       symbol,
       image,
-      rate,
       ngnRate,
       platformAddresses,
       hasPlatforms,
@@ -93,14 +91,12 @@ export class AssetController {
     @Path() id: string,
     @Body() data: IUpdateAssetInput,
   ) {
-    const { platformAddresses, rate, ngnRate, hasPlatforms, isActive } = data;
+    const { platformAddresses, ngnRate, hasPlatforms, isActive } = data;
 
     const asset = await AssetModel.findById(id);
     if (!asset) throw new NotFoundError('Asset not found');
 
-    if (rate) {
-      asset.rate = rate;
-
+    if (ngnRate) {
       const notification = new NotificationModel();
       notification.title = '📢 Price Update Alert!';
       notification.content = `${asset.name} rate has changed! Check the latest rate and trade wisely. 💹`;
