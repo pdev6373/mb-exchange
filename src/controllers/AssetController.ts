@@ -85,13 +85,12 @@ export class AssetController {
   }
 
   @Patch('/:id')
-  // @Validate(UpdateAssetSchema)
+  @Validate(UpdateAssetSchema)
   @Security('BearerAuth', Object.values(Role))
   public async updateAsset(
     @Path() id: string,
     @Body() data: IUpdateAssetInput,
   ) {
-    console.log('Hello');
     const { platformAddresses, ngnRate, hasPlatforms, isActive } = data;
 
     const asset = await AssetModel.findById(id);

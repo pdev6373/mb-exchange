@@ -283,7 +283,7 @@ export class AuthController {
   public async completeAdditionalProfile(
     @Body() data: ICompleteAdditionalProfileInput,
   ) {
-    const { email, country, phoneNumber, dateOfBirth, gender } = data;
+    const { email, country, phoneNumber, dateOfBirth, gender, nin } = data;
 
     if (!isValidCountryCode(country.code))
       throw new BadRequestError('Invalid country code');

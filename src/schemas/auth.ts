@@ -84,6 +84,8 @@ export const CompleteAdditionalProfileSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)')
     .refine(isAdult, { message: 'You must be at least 18 years old' }),
   gender: z.nativeEnum(Gender),
+  // nin: z.string().min(1, 'Nin is required'),
+  nin: z.string().optional(),
 });
 
 export interface ICompleteAdditionalProfileInput {
@@ -97,6 +99,7 @@ export interface ICompleteAdditionalProfileInput {
   phoneNumber: string;
   dateOfBirth: string;
   gender: GenderType;
+  nin?: string;
 }
 
 export const SetupPinSchema = z.object({
