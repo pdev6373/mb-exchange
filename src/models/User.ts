@@ -87,6 +87,9 @@ export class User {
   @prop({ default: false })
   public emailVerified?: boolean;
 
+  @prop({ default: false })
+  public identityVerified?: boolean;
+
   @prop()
   public registrationStatus?: RegistrationStatus;
 

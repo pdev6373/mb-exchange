@@ -43,10 +43,7 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from '../utils/customErrors';
-import {
-  Request as ExpressRequest,
-  Response as ExpressResponse,
-} from 'express';
+import { Request as ExpressRequest } from 'express';
 import {
   generateOtp,
   generateTokens,
@@ -63,10 +60,90 @@ import { CountModel } from '../models/Count';
 import { ReasonModel } from '../models/Reason';
 // import { rateLimiter } from '../middleware/rateLimit';
 import { promisifyMiddleware } from '../utils/promisifyMiddleware';
+import axios from 'axios';
+
+type NinLookupResponse = {
+  status: 'successful' | 'failed';
+  message: string;
+  timestamp: string;
+  data: {
+    birthcountry: string;
+    birthdate: string;
+    birthlga: string;
+    birthstate: string;
+    educationallevel: string;
+    email: string;
+    employmentstatus: string;
+    firstname: string;
+    gender: 'm' | 'f';
+    heigth: string;
+    maritalstatus: string;
+    middlename: string;
+    nin: string;
+    nok_address1: string;
+    nok_address2: string;
+    nok_firstname: string;
+    nok_lga: string;
+    nok_middlename: string;
+    nok_postalcode: string;
+    nok_state: string;
+    nok_surname: string;
+    nok_town: string;
+    ospokenlang: string;
+    pfirstname: string;
+    photo: string;
+    pmiddlename: string;
+    profession: string;
+    psurname: string;
+    religion: string;
+    residence_address: string;
+    residence_lga: string;
+    residence_state: string;
+    residence_town: string;
+    residencestatus: string;
+    self_origin_lga: string;
+    self_origin_place: string;
+    self_origin_state: string;
+    spoken_language: string;
+    surname: string;
+    telephoneno: string;
+    title: string;
+    userid: string;
+    vnin: string;
+    central_iD: string;
+    tracking_id: string;
+  };
+};
 
 @Tags('Auth')
 @Route('auth')
 export class AuthController {
+  private lookupNIN = async (nin: string) => {
+    try {
+      const response = await axios.post<NinLookupResponse>(
+        'https://api.withmono.com/v3/lookup/nin',
+        {
+          nin,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'mono-sec-key': process.env.MONO_SECRET_KEY,
+          },
+        },
+      );
+
+      console.log('NIN Lookup Response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        'Error looking up NIN:',
+        error.response?.data || error.message,
+      );
+      throw error;
+    }
+  };
+
   private async getUniqueReferralCode() {
     let referralCode: string = '';
     let isUnique = false;
@@ -298,6 +375,21 @@ export class AuthController {
 
     const phoneNumberExists = await UserModel.findOne({ phoneNumber });
     if (phoneNumberExists) throw new BadRequestError('Phone number taken');
+
+    if (nin) {
+      const response = await this.lookupNIN(nin);
+      if (response?.status === 'successful') {
+        if (
+          user?.firstName?.toLowerCase()?.trim() !==
+            response?.data?.firstname?.toLowerCase()?.trim() ||
+          user?.lastName?.toLowerCase()?.trim() !==
+            response?.data?.surname?.toLowerCase()?.trim() ||
+          !user?.gender?.startsWith(response?.data?.gender)
+        ) {
+          throw new BadRequestError('Invalid nin');
+        } else user.identityVerified = true;
+      } else throw new BadRequestError('Invalid nin');
+    }
 
     user.country = {
       code: country.code,
