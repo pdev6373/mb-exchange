@@ -376,20 +376,20 @@ export class AuthController {
     const phoneNumberExists = await UserModel.findOne({ phoneNumber });
     if (phoneNumberExists) throw new BadRequestError('Phone number taken');
 
-    if (nin) {
-      const response = await this.lookupNIN(nin);
-      if (response?.status === 'successful') {
-        if (
-          user?.firstName?.toLowerCase()?.trim() !==
-            response?.data?.firstname?.toLowerCase()?.trim() ||
-          user?.lastName?.toLowerCase()?.trim() !==
-            response?.data?.surname?.toLowerCase()?.trim() ||
-          !user?.gender?.startsWith(response?.data?.gender)
-        ) {
-          throw new BadRequestError('Invalid nin');
-        } else user.identityVerified = true;
-      } else throw new BadRequestError('Invalid nin');
-    }
+    // if (nin) {
+    //   const response = await this.lookupNIN(nin);
+    //   if (response?.status === 'successful') {
+    //     if (
+    //       user?.firstName?.toLowerCase()?.trim() !==
+    //         response?.data?.firstname?.toLowerCase()?.trim() ||
+    //       user?.lastName?.toLowerCase()?.trim() !==
+    //         response?.data?.surname?.toLowerCase()?.trim() ||
+    //       !user?.gender?.startsWith(response?.data?.gender)
+    //     ) {
+    //       throw new BadRequestError('Invalid nin');
+    //     } else user.identityVerified = true;
+    //   } else throw new BadRequestError('Invalid nin');
+    // }
 
     user.country = {
       code: country.code,
